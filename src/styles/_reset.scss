@@ -1,0 +1,45 @@
+/* 重置默认内外边距 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* 重置列表样式 */
+ul,
+ol {
+  list-style: none;
+}
+
+/* 重置链接样式（可根据项目需求调整） */
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* 重置表单元素样式（可进一步细化） */
+input,
+button,
+textarea {
+  font-family: inherit;
+  font-size: inherit;
+  border: none;
+  outline: none;
+}
+
+/* 重置标题标签字号和字体粗细（可按需调整） */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-size: 100%;
+  font-weight: normal;
+}
+
+/* 重置图片样式（避免图片溢出容器） */
+img {
+  max-width: 100%;
+  height: auto;
+}
