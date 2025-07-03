@@ -1,82 +1,91 @@
-import request from '../request';
-import type { Interview } from '../types';
+import axios from '../request';
+import type {
+  FaceAnalysisResponse,
+  VoiceAnalysisResponse,
+  RealTimeAnalysis,
+} from '../types';
 
-// 轮询间隔(ms)
-const POLL_INTERVAL = 3000;
-
-/**
- * 提交语音分析任务
- * @param file 音频文件
- * @param onProgress 进度回调
- */
-export const analyzeVoice = async (
-  file: File,
-  onProgress?: (progress: number) => void
-): Promise<Interview.AnalysisResult> => {
+// 人脸分析接口
+export const msrFace = (data: {
+  sid: string;
+  file: Blob;
+}): Promise<FaceAnalysisResponse> => {
   const formData = new FormData();
-  formData.append('file', file);
+  formData.append('file', data.file);
 
-  // 1. 提交分析任务
-  const { taskId } = await request.post<Interview.TaskResponse>(
-    '/customer/interview/msrVoice',
-    formData,
-    { headers: { 'Content-Type': 'multipart/form-data' } }
-  );
-
-  // 2. 启动轮询获取结果
-  return pollAnalysisResult(taskId, onProgress);
-};
-
-/**
- * 提交视频分析任务
- * @param file 视频/图片文件
- */
-export const analyzeFace = async (
-  file: File
-): Promise<Interview.AnalysisResult> => {
-  const formData = new FormData();
-  formData.append('file', file);
-
-  // 直接获取分析结果（短任务）
-  return request.post<Interview.AnalysisResult>(
-    '/customer/interview/msrFace',
-    formData,
-    { headers: { 'Content-Type': 'multipart/form-data' } }
-  );
-};
-
-/**
- * 轮询分析结果（私有方法）
- */
-const pollAnalysisResult = async (
-  taskId: string,
-  onProgress?: (progress: number) => void
-): Promise<Interview.AnalysisResult> => {
-  return new Promise(resolve => {
-    const timer = setInterval(async () => {
-      try {
-        // 查询任务状态
-        const result = await request.get<Interview.AnalysisResult>(
-          `/task/status/${taskId}`
-        );
-
-        // 更新进度
-        if (onProgress && typeof result.progress === 'number') {
-          onProgress(result.progress);
-        }
-
-        // 完成或失败时终止轮询
-        if (result.status === 'completed' || result.status === 'failed') {
-          clearInterval(timer);
-          resolve(result);
-        }
-      } catch (error) {
-        clearInterval(timer);
-        resolve({
-          status: 'failed',
-          error: '轮询请求失败',
-        });
-      }
-    }, POLL_INTERVAL);
+  return axios.post('/customer/interview/msrFace', formData, {
+    params: { sid: data.sid },
+    headers: { 'Content-Type': 'multipart/form-data' },
   });
+};
+
+// 语音分析接口
+export const msrVoice = (data: {
+  sid: string;
+  recordId: string;
+  file: Blob;
+}): Promise<VoiceAnalysisResponse> => {
+  const formData = new FormData();
+  formData.append('file', data.file);
+
+  return axios.post('/customer/interview/msrVoice', formData, {
+    params: {
+      sid: data.sid,
+      recordId: data.recordId,
+    },
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+};
+
+/**
+ * 创建WebSocket连接
+ * @param type 分析类型 - 'face' | 'voice'
+ * @param sid 会话ID
+ * @param onMessage 消息回调函数
+ * @returns WebSocket实例
+ */
+export const createAnalysisSocket = (
+  type: 'face' | 'voice',
+  sid: string,
+  onMessage: (analysis: RealTimeAnalysis) => void
+): WebSocket => {
+  const token = localStorage.getItem('token') || '';
+  const url = `ws://${location.host}/customer/msr/${type}/${sid}?token=${token}`;
+
+  const ws = new WebSocket(url);
+
+  ws.onmessage = event => {
+    try {
+      const data = JSON.parse(event.data);
+      onMessage({
+        type,
+        data:
+          type === 'face'
+            ? (data as FaceAnalysisResponse)
+            : (data as VoiceAnalysisResponse),
+      });
+    } catch (error) {
+      console.error(`解析${type}分析数据失败:`, error);
+    }
+  };
+
+  ws.onerror = error => {
+    console.error(`${type} WebSocket错误:`, error);
+  };
+
+  ws.onclose = event => {
+    console.log(`${type} WebSocket连接关闭:`, event.reason);
+  };
+
+  return ws;
+};
+
+/**
+ * 安全关闭WebSocket连接
+ * @param ws WebSocket实例
+ */
+export const safeCloseSocket = (ws: WebSocket | null) => {
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    ws.close(1000, '正常关闭');
+  }
 };

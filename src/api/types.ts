@@ -1,29 +1,49 @@
-// 面试模块类型
-export namespace Interview {
-  /** 文件分析基础参数 */
-  export interface AnalysisParams {
-    recordId?: string; // 可选关联记录ID
-    file: File; // 文件对象
-  }
-
-  /** 分析任务响应 */
-  export interface TaskResponse {
-    taskId: string; // 任务唯一ID
-    estimatedTime: number; // 预估耗时(秒)
-  }
-
-  /** 分析结果结构 */
-  export interface AnalysisResult {
-    status: 'pending' | 'processing' | 'completed' | 'failed';
-    progress?: number; // 进度百分比(0-100)
-    data?: {
-      text?: string; // 语音转文字结果
-      emotions?: {
-        // 视频情绪分析
-        type: string; // 情绪类型（happy/sad/angry/surprise/neutral）
-        confidence: number; // 置信度(0-1)
-      }[];
+// 人脸分析响应
+export interface FaceAnalysisResponse {
+  requestId: string;
+  face: {
+    round: {
+      smile: number; // 微笑程度 (0-100)
+      appearance: number; // 整体仪容 (0-100)
+      confidence: number; // 自信程度 (0-100)
     };
-    error?: string; // 失败信息
-  }
+    frame: {
+      eye: number; // 眼神交流 (0-100)
+      nature: string; // 手势自然度 (高等/中等/较差)
+    };
+  };
 }
+
+// 语音分析响应
+export interface VoiceAnalysisResponse {
+  requestId: string;
+  voice: {
+    round: {
+      fluency: number; // 表达流畅度 (0-100)
+      logic: number; // 逻辑性 (0-100)
+      words: number; // 词汇丰富度 (0-100)
+    };
+    frame: {
+      speed: number; // 语速 (字/分钟)
+      filler: number; // 语气词频率 (次数)
+    };
+  };
+  word: {
+    // 新增文本分析部分
+    round: {
+      complete: number; // 回答完整性 (0-100)
+      match: number; // 岗位匹配度 (0-100)
+      accurate: number; // 技术准确性 (0-100)
+    };
+    frame: {
+      star: number; // STAR结构应用 (0-100)
+      comprehend: number; // 问题理解度 (0-100)
+    };
+  };
+  keyword: Record<string, number>; // 关键词统计
+}
+
+// WebSocket 实时分析消息
+export type RealTimeAnalysis =
+  | { type: 'face'; data: FaceAnalysisResponse }
+  | { type: 'voice'; data: VoiceAnalysisResponse };
