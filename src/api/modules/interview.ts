@@ -1,3 +1,4 @@
+// interview.ts
 import axios from '../request';
 import type {
   FaceAnalysisResponse,
@@ -11,11 +12,10 @@ export const msrFace = (data: {
   file: Blob;
 }): Promise<FaceAnalysisResponse> => {
   const formData = new FormData();
-  formData.append('file', data.file);
+  formData.append('file', data.file, `frame-${Date.now()}.jpg`); // 添加文件名
 
   return axios.post('/customer/interview/msrFace', formData, {
     params: { sid: data.sid },
-    headers: { 'Content-Type': 'multipart/form-data' },
   });
 };
 
@@ -26,44 +26,40 @@ export const msrVoice = (data: {
   file: Blob;
 }): Promise<VoiceAnalysisResponse> => {
   const formData = new FormData();
-  formData.append('file', data.file);
+  formData.append('file', data.file, `audio-${Date.now()}.webm`);
 
   return axios.post('/customer/interview/msrVoice', formData, {
     params: {
       sid: data.sid,
       recordId: data.recordId,
     },
-    headers: { 'Content-Type': 'multipart/form-data' },
   });
 };
 
-/**
- * 创建WebSocket连接
- * @param type 分析类型 - 'face' | 'voice'
- * @param sid 会话ID
- * @param onMessage 消息回调函数
- * @returns WebSocket实例
- */
+// 创建WebSocket连接
 export const createAnalysisSocket = (
   type: 'face' | 'voice',
   sid: string,
   onMessage: (analysis: RealTimeAnalysis) => void
 ): WebSocket => {
-  const token = localStorage.getItem('token') || '';
-  const url = `ws://${location.host}/customer/msr/${type}/${sid}?token=${token}`;
+  const token =
+    localStorage.getItem('token') ||
+    'eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjEsInVzZXJuYW1lIjoi5YiY5amnIn0.CphWFNKqYpIZbmwu1efdtvi2jYzGQawz3yzRpHjLePA';
+
+  // 使用正确的WebSocket URL
+  const url = `ws://8.136.127.46:8080/customer/msr/${type}/${sid}?token=${token}`;
 
   const ws = new WebSocket(url);
 
   ws.onmessage = event => {
     try {
-      const data = JSON.parse(event.data);
-      onMessage({
-        type,
-        data:
-          type === 'face'
-            ? (data as FaceAnalysisResponse)
-            : (data as VoiceAnalysisResponse),
-      });
+      const parsedData = JSON.parse(event.data);
+
+      if (type === 'face') {
+        onMessage({ type: 'face', data: parsedData as FaceAnalysisResponse });
+      } else {
+        onMessage({ type: 'voice', data: parsedData as VoiceAnalysisResponse });
+      }
     } catch (error) {
       console.error(`解析${type}分析数据失败:`, error);
     }
@@ -80,10 +76,7 @@ export const createAnalysisSocket = (
   return ws;
 };
 
-/**
- * 安全关闭WebSocket连接
- * @param ws WebSocket实例
- */
+// 安全关闭WebSocket连接
 export const safeCloseSocket = (ws: WebSocket | null) => {
   if (ws && ws.readyState === WebSocket.OPEN) {
     ws.close(1000, '正常关闭');

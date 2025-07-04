@@ -21,7 +21,8 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "lib": ["ESNext", "DOM"],
-    "types": ["vite/client", "vue-router/auto-imports"]
+    "types": ["vite/client", "vue-router/auto-imports","node"],
+    "typeRoots": ["./node_modules/@types"] 
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue"]
 }
