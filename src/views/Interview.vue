@@ -119,8 +119,8 @@
   </div>
 </template>
 
-
 <script setup lang="ts">
+
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import * as echarts from 'echarts'
 import { msrFace, msrVoice } from '../api/modules/interview'
@@ -129,7 +129,6 @@ import type {
   VoiceAnalysisResponse
 } from '../api/types'
 
-// ==================== 状态管理 ====================
 const showPermissionPopup = ref(true)
 const videoElement = ref<HTMLVideoElement | null>(null)
 const canvasElement = ref<HTMLCanvasElement | null>(null)
@@ -265,37 +264,15 @@ const updateChart = () => {
   })
 }
 
-const addDataPoint = (type: 'face' | 'voice', score: number) => {
-  const now = new Date()
-  const timeStr = `${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`
-  
-  if (type === 'face') {
-    faceScores.value.push(score)
-  } else {
-    voiceScores.value.push(score)
-  }
-  
-  // 只保留最近10个数据点
-  if (faceScores.value.length > 10) faceScores.value.shift()
-  if (voiceScores.value.length > 10) voiceScores.value.shift()
-  
-  timestamps.value.push(timeStr)
-  if (timestamps.value.length > 10) timestamps.value.shift()
-  
-  updateChart()
-}
-
 // ==================== 媒体处理核心功能 ====================
 const setupAudioRecorder = (stream: MediaStream) => {
   try {
-    // 1. 检查浏览器是否支持MediaRecorder
     if (typeof MediaRecorder === 'undefined') {
       console.warn('浏览器不支持MediaRecorder API，使用备选方案')
       setupFallbackAudioRecorder(stream)
       return
     }
     
-    // 2. 获取支持的MIME类型
     const supportedTypes = [
       'audio/webm;codecs=opus',
       'audio/webm',
@@ -303,32 +280,23 @@ const setupAudioRecorder = (stream: MediaStream) => {
       'audio/mpeg'
     ].filter(type => MediaRecorder.isTypeSupported(type))
     
-    // 3. 设置录制选项
     const options: MediaRecorderOptions = {}
     if (supportedTypes.length > 0) {
       options.mimeType = supportedTypes[0]
-      console.log('使用音频格式:', supportedTypes[0])
     }
     
-    // 4. 创建媒体录制器
     audioRecorder = new MediaRecorder(stream, options)
-    
-    // 5. 重置音频片段
     audioChunks.value = []
     
-    // 6. 设置数据处理器
     audioRecorder.ondataavailable = (event) => {
       if (event.data && event.data.size > 0) {
         audioChunks.value.push(event.data)
       }
     }
     
-    // 7. 添加错误处理
     audioRecorder.onerror = (event) => {
       console.error('媒体录制错误:', event)
     }
-    
-    console.log('MediaRecorder初始化成功')
     
   } catch (error) {
     console.error('MediaRecorder初始化失败:', error)
@@ -338,7 +306,6 @@ const setupAudioRecorder = (stream: MediaStream) => {
 
 const setupFallbackAudioRecorder = (stream: MediaStream) => {
   try {
-    // 1. 创建音频上下文
     const AudioContext = window.AudioContext || (window as any).webkitAudioContext
     if (!AudioContext) {
       console.error('浏览器不支持AudioContext API')
@@ -346,24 +313,15 @@ const setupFallbackAudioRecorder = (stream: MediaStream) => {
     }
     
     audioContext = new AudioContext()
-    
-    // 2. 创建媒体流源
     const source = audioContext.createMediaStreamSource(stream)
-    
-    // 3. 创建处理器
     audioProcessor = audioContext.createScriptProcessor(4096, 1, 1)
-    
-    // 4. 连接节点
     source.connect(audioProcessor)
     audioProcessor.connect(audioContext.destination)
     
-    // 5. 音频数据处理
     audioProcessor.onaudioprocess = (event) => {
       const channelData = event.inputBuffer.getChannelData(0)
       audioData.value.push(new Float32Array(channelData))
     }
-    
-    console.log('备选音频录制方案初始化成功')
     
   } catch (error) {
     console.error('备选音频录制方案失败:', error)
@@ -406,7 +364,6 @@ const handlePermission = async (choice: string) => {
   }
 
   try {
-    // 请求摄像头和麦克风权限
     const stream = await navigator.mediaDevices.getUserMedia({ 
       video: true,
       audio: true 
@@ -414,33 +371,26 @@ const handlePermission = async (choice: string) => {
     
     mediaStream.value = stream
     
-    // 将视频流绑定到video元素
     if (videoElement.value) {
       videoElement.value.srcObject = stream
     }
     
-    // 初始化音频录制
     setupAudioRecorder(stream)
-    
-    // 创建WebSocket连接
     createWebSockets()
     
   } catch (error) {
     console.error('获取媒体设备权限失败:', error)
-    // 添加失败处理 - 重新显示权限弹窗
     showPermissionPopup.value = true
     alert('无法访问摄像头和麦克风，请检查权限设置')
   }
 }
-// 释放媒体流资源
+
 const releaseMediaStream = () => {
   if (mediaStream.value) {
     mediaStream.value.getTracks().forEach(track => track.stop())
     mediaStream.value = null
   }
 }
-
-// 在适当位置调用（如权限被拒绝时）
 
 const createWebSockets = () => {
   const token = localStorage.getItem('token') || 'eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjEsInVzZXJuYW1lIjoi5YiY5amnIn0.CphWFNKqYpIZbmwu1efdtvi2jYzGQawz3yzRpHjLePA'
@@ -454,19 +404,7 @@ const createWebSockets = () => {
   
   faceSocket.onmessage = (event) => {
     try {
-      const data: FaceAnalysisResponse = JSON.parse(event.data)
-      console.log(12);
-      console.log(data);
-      
-      
-      // 计算综合得分
-      const score = Math.round((
-        data.face.round.smile + 
-        data.face.round.confidence + 
-        data.face.frame.eye
-      ) / 3)
-      
-      addDataPoint('face', score)
+      console.log('收到人脸分析结果:', event.data)
     } catch (error) {
       console.error('解析人脸分析数据失败:', error)
     }
@@ -481,19 +419,7 @@ const createWebSockets = () => {
   
   voiceSocket.onmessage = (event) => {
     try {
-      const data: VoiceAnalysisResponse = JSON.parse(event.data)
-      console.log(66);
-      console.log(data);
-      
-      
-      // 计算综合得分
-      const score = Math.round((
-        data.voice.round.fluency + 
-        data.voice.round.logic + 
-        data.voice.round.words
-      ) / 3)
-      
-      addDataPoint('voice', score)
+      console.log('收到语音分析结果:', event.data)
     } catch (error) {
       console.error('解析语音分析数据失败:', error)
     }
@@ -502,192 +428,170 @@ const createWebSockets = () => {
 
 const startInterview = async () => {
   try {
-    console.log("开始面试流程...");
+    console.log("开始面试流程...")
+    isInterviewing.value = true
     
-    // 设置面试状态
-    isInterviewing.value = true;
-    
-    // 如果媒体流未初始化，尝试初始化
     if (!mediaStream.value) {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ 
           video: true,
           audio: true 
-        });
+        })
         
-        mediaStream.value = stream;
+        mediaStream.value = stream
         
-        // 将视频流绑定到video元素
         if (videoElement.value) {
-          videoElement.value.srcObject = stream;
+          videoElement.value.srcObject = stream
         }
         
-        // 初始化音频录制
-        setupAudioRecorder(stream);
-        
-        // 创建WebSocket连接
-        createWebSockets();
+        setupAudioRecorder(stream)
+        createWebSockets()
         
       } catch (error) {
-        console.error('获取媒体设备失败:', error);
-        showPermissionPopup.value = true;
-        alert('无法访问摄像头和麦克风，请检查设备权限');
-        return;
+        console.error('获取媒体设备失败:', error)
+        showPermissionPopup.value = true
+        alert('无法访问摄像头和麦克风，请检查设备权限')
+        return
       }
     }
     
-    // 确保媒体流已初始化
     if (!mediaStream.value) {
-      console.error('媒体流初始化失败');
-      showPermissionPopup.value = true;
-      return;
+      console.error('媒体流初始化失败')
+      showPermissionPopup.value = true
+      return
     }
     
-    // ==================== 核心面试逻辑 ====================
-    
-    // 1. 立即发送第一帧视频
+    // 1. 发送第一帧视频
     try {
-      const videoBlob = await getVideoFrame();
-      console.log("videoBlob:",videoBlob);
+      const videoBlob = await getVideoFrame()
       
-      // 发送视频帧请求
+      // 添加固定 requestId: '8'
       const faceResponse = await msrFace({
-        sid: '123', // 视频SID
+        sid: '123',
+        requestId: '8', // 添加固定requestId
         file: videoBlob
-      });
+      })
       
-      console.log('第一帧视频发送成功:', faceResponse);
-      addDataPoint('face', calculateFaceScore(faceResponse));
+      console.log('第一帧视频发送成功:', faceResponse)
     } catch (error: any) {
-      console.error('第一帧视频发送失败:', error);
+      console.error('第一帧视频发送失败:', error)
       if (error?.response?.status === 401) {
-        alert('视频认证失败: ' + error.message);
+        alert('视频认证失败: ' + error.message)
       }
     }
     
-    // 2. 立即发送第一段语音（4秒）
+    // 2. 发送第一段语音
     if (audioRecorder) {
-      // 使用MediaRecorder方案
-      audioRecorder.start(4000); // 每4秒生成一个片段
-      
-      // 设置一个一次性定时器来捕获第一段语音
-      setTimeout(async () => {
+      audioRecorder.start(4000)
+      setTimeout(() => {
         if (audioRecorder && audioRecorder.state !== 'inactive') {
-          audioRecorder.stop();
-          audioRecorder.start(4000); // 重新开始录制
+          audioRecorder.stop()
+          audioRecorder.start(4000)
         }
-      }, 4000);
+      }, 4000)
     } else if (audioProcessor) {
-      // 备选方案：立即发送当前收集的语音
       if (audioData.value.length > 0) {
         try {
-          const wavBlob = encodeToWav(audioData.value);
-          audioData.value = []; // 清空已发送的数据
+          const wavBlob = encodeToWav(audioData.value)
+          audioData.value = []
           
+          // 添加固定 requestId: '8'
           const voiceResponse = await msrVoice({
-            sid: '234', // 语音SID
-            recordId: '8', // 默认recordId
+            sid: '234',
+            recordId: '8',
+            requestId: '8', // 添加固定requestId
             file: wavBlob
-          });
+          })
           
-          console.log('第一段语音发送成功:', voiceResponse);
-          addDataPoint('voice', calculateVoiceScore(voiceResponse));
+          console.log('第一段语音发送成功:', voiceResponse)
         } catch (error: any) {
-          console.error('第一段语音发送失败:', error);
+          console.error('第一段语音发送失败:', error)
           if (error?.response?.status === 401) {
-            alert('语音认证失败: ' + error.message);
+            alert('语音认证失败: ' + error.message)
           }
         }
       }
     }
     
-    // 3. 设置定时器：每3秒发送视频帧
+    // 3. 设置视频帧定时发送
     videoInterval = setInterval(async () => {
       try {
-        const videoBlob = await getVideoFrame();
+        const videoBlob = await getVideoFrame()
         
+        // 添加固定 requestId: '8'
         const faceResponse = await msrFace({
           sid: '123',
+          requestId: '8', // 添加固定requestId
           file: videoBlob
-        });
+        })
         
-        console.log('视频帧发送成功:', faceResponse);
-        addDataPoint('face', calculateFaceScore(faceResponse));
+        console.log('视频帧发送成功:', faceResponse)
       } catch (error: any) {
-        console.error('视频帧发送失败:', error);
+        console.error('视频帧发送失败:', error)
         if (error?.response?.status === 401) {
-          alert('视频认证失败: ' + error.message);
+          alert('视频认证失败: ' + error.message)
         }
       }
-    }, 3000);
+    }, 3000)
     
-    // 4. 设置定时器：每4秒发送语音片段
+    // 4. 设置语音定时发送
     audioInterval = setInterval(() => {
       if (audioRecorder && audioRecorder.state !== 'inactive') {
-        audioRecorder.stop(); // 停止会触发ondataavailable
-        audioRecorder.start(4000); // 重新开始录制
+        audioRecorder.stop()
+        audioRecorder.start(4000)
       } else if (audioProcessor && audioData.value.length > 0) {
-        // 备选方案：发送当前收集的语音
         try {
-          const wavBlob = encodeToWav(audioData.value);
-          audioData.value = []; // 清空已发送的数据
+          const wavBlob = encodeToWav(audioData.value)
+          audioData.value = []
           
+          // 添加固定 requestId: '8'
           msrVoice({
             sid: '234',
             recordId: '8',
+            requestId: '8', // 添加固定requestId
             file: wavBlob
           }).then(voiceResponse => {
-            console.log('语音片段发送成功:', voiceResponse);
-            addDataPoint('voice', calculateVoiceScore(voiceResponse));
+            console.log('语音片段发送成功:', voiceResponse)
           }).catch((error: any) => {
-            console.error('语音片段发送失败:', error);
+            console.error('语音片段发送失败:', error)
             if (error?.response?.status === 401) {
-              alert('语音认证失败: ' + error.message);
+              alert('语音认证失败: ' + error.message)
             }
-          });
+          })
         } catch (error) {
-          console.error('语音编码失败:', error);
+          console.error('语音编码失败:', error)
         }
       }
-    }, 4000);
+    }, 4000)
     
-    console.log('面试已开始，定时器已启动');
   } catch (error) {
-    console.error('面试启动失败:', error);
-    alert('启动面试失败，请检查网络连接和权限设置');
-    isInterviewing.value = false;
+    console.error('面试启动失败:', error)
+    alert('启动面试失败，请检查网络连接和权限设置')
+    isInterviewing.value = false
   }
-};
-// 生成唯一请求ID
-const generateRequestId = (): string => {
-  return Date.now() + '-' + Math.random().toString(36).substr(2, 9);
-};
+}
+
 const stopInterview = () => {
   isInterviewing.value = false
   
-  // 停止媒体录制
   if (audioRecorder && audioRecorder.state !== 'inactive') {
     try {
       audioRecorder.stop()
-      console.log('媒体录制已停止')
     } catch (error) {
       console.error('停止媒体录制失败:', error)
     }
   }
   
-  // 停止音频处理器
   if (audioProcessor) {
     audioProcessor.disconnect()
     audioProcessor = null
   }
   
-  // 关闭音频上下文
   if (audioContext) {
     audioContext.close().catch(console.error)
     audioContext = null
   }
   
-  // 清除定时器
   if (videoInterval) clearInterval(videoInterval)
   if (audioInterval) clearInterval(audioInterval)
   
@@ -699,16 +603,17 @@ const stopInterview = () => {
     const audioBlob = new Blob(audioChunks.value, { type: 'audio/webm' })
     audioChunks.value = []
     
+    // 添加固定 requestId: '8'
     msrVoice({ 
       sid: '234', 
       recordId: '8', 
+      requestId: '8', // 添加固定requestId
       file: audioBlob 
     }).catch(error => {
       console.error('最终语音分析请求失败:', error)
     })
   }
   
-  // 清空音频数据
   audioData.value = []
 }
 
@@ -720,7 +625,6 @@ const encodeToWav = (audioChunks: Float32Array[]): Blob => {
   const byteRate = sampleRate * numChannels * bitsPerSample / 8
   const blockAlign = numChannels * bitsPerSample / 8
   
-  // 合并所有音频数据
   const mergedData = new Float32Array(
     audioChunks.reduce((acc, chunk) => acc + chunk.length, 0)
   )
@@ -731,7 +635,6 @@ const encodeToWav = (audioChunks: Float32Array[]): Blob => {
     offset += chunk.length
   }
   
-  // 创建缓冲区
   const buffer = new ArrayBuffer(44 + mergedData.length * 2)
   const view = new DataView(buffer)
   
@@ -750,7 +653,6 @@ const encodeToWav = (audioChunks: Float32Array[]): Blob => {
   writeString(view, 36, 'data')
   view.setUint32(40, mergedData.length * 2, true)
   
-  // 写入PCM数据
   let dataOffset = 44
   for (let i = 0; i < mergedData.length; i++) {
     const sample = Math.max(-1, Math.min(1, mergedData[i]))
@@ -770,10 +672,14 @@ const writeString = (view: DataView, offset: number, str: string) => {
 
 // ==================== 生命周期钩子 ====================
 onMounted(() => {
+  if (!localStorage.getItem('token')) {
+    localStorage.setItem('token', 'eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjEsInVzZXJuYW1lIjoi5YiY5amnIn0.CphWFNKqYpIZbmwu1efdtvi2jYzGQawz3yzRpHjLePA')
+  }
+  
   if (!mediaStream.value) {
     showPermissionPopup.value = true
   }
-  // 浏览器兼容性检查
+  
   const isMediaRecorderSupported = typeof MediaRecorder !== 'undefined'
   const isAudioContextSupported = typeof AudioContext !== 'undefined' || 
                                 typeof (window as any).webkitAudioContext !== 'undefined'
@@ -786,16 +692,21 @@ onMounted(() => {
 onBeforeUnmount(() => {
   stopInterview()
   
-  // 关闭WebSocket连接
   if (faceSocket) faceSocket.close()
   if (voiceSocket) voiceSocket.close()
   
-  // 释放媒体资源
   if (mediaStream.value) {
     mediaStream.value.getTracks().forEach(track => track.stop())
   }
 })
+
+
+
+
 </script>
+
+
+
 
 <style scoped>
 .permission-popup {

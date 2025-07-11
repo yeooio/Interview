@@ -49,6 +49,7 @@ service.interceptors.response.use(
   (response: AxiosResponse) => {
     return response.data;
   },
+  
   (error: AxiosError) => {
     const status = error.response?.status || 500;
     const errorMap: Record<number, string> = {
@@ -74,9 +75,26 @@ service.interceptors.response.use(
   }
 );
 
+
+
+
 // 生成唯一请求ID
 function generateRequestId(): string {
   return Date.now() + '-' + Math.random().toString(36).substr(2, 9);
 }
 
 export default service;
+
+// 在您的request.ts文件中添加这个方法
+export const getCareerByRegionId = (params: { regionId: string }) => {
+  return service({
+    url: '/customer/career/getByRegionId',
+    method: 'GET',
+    params: {
+      regionId: params.regionId
+    },
+    headers: {
+      'Authorization': 'eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjEsInVzZXJuYW1lIjoi5YiY5amnIn0.CphWFNKqYpIZbmwu1efdtvi2jYzGQawz3yzRpHjLePA'
+    }
+  })
+}

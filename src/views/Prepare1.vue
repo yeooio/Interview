@@ -41,7 +41,7 @@
           </el-form-item>
           <el-form-item label="面试题数：">
             <el-select v-model="form.questionCount" placeholder="请选择">
-              <el-option label="5" value="5"></el-option>
+              <el-option label="3" value="3"></el-option>
               <el-option label="8" value="8"></el-option>
               <el-option label="10" value="10"></el-option>
             </el-select>
@@ -67,23 +67,60 @@
         </div>
       </div>
       <!-- 开始面试按钮 -->
-      <el-button type="primary" class="start-btn">开始面试</el-button>
+      <el-button type="primary" class="start-btn" @click="this.$router.push('/interview')">开始面试</el-button>
     </div>
   </div>
 </template>
-
 <script setup>
-import { reactive } from 'vue';
-import { ElForm, ElFormItem, ElSelect, ElOption, ElButton } from 'element-plus';
+import { reactive, ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { ElMessage } from 'element-plus';
+import service from '@/api/request'; // 导入axios实例
 
 const form = reactive({
   duration: '10',
   difficulty: '难',
-  questionCount: '5',
+  questionCount: '3',
   language: '中文'
 });
-</script>
 
+const router = useRouter();
+const loading = ref(false); // 按钮加载状态
+
+// 开始面试请求
+const startInterview = async () => {
+  try {
+    loading.value = true; // 显示加载状态
+    
+    // 准备请求参数
+    const params = {
+      duration: parseInt(form.duration),
+      difficulty: form.difficulty,
+      questionCount: parseInt(form.questionCount),
+      language: form.language
+    };
+    
+    // 发送开始面试请求
+    const response = await service.post('/customer/interview/begin', params);
+    // gaizhe
+
+
+    
+    // 检查响应状态
+    if (response && response.code === 200) {
+      // 跳转到面试页面 - 这是关键跳转代码
+      router.push({ name: 'Interview' });
+    } else {
+      throw new Error(response?.message || '未知错误');
+    }
+  } catch (error) {
+    console.error('开始面试失败:', error);
+    ElMessage.error(`开始面试失败: ${error.message || '请检查网络连接'}`);
+  } finally {
+    loading.value = false; // 关闭加载状态
+  }
+};
+</script>
 <style scoped>
 .interview-simulation-section {
   display: flex;

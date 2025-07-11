@@ -6,8 +6,8 @@ const Login = () => import('../views/Login.vue');
 const Home = () => import('../views/Home.vue');
 // const Prepare1 = ()=>import("../views/Prepare1.vue")
 const Prepare1 =()=>import('../views/Prepare1.vue')
-const Prepare2 =()=>import('../views/Prepare2.vue')
 const Interview =()=>import('../views/Interview.vue')
+const Choice = ()=>import('../views/Choice.vue')
 
 
 const routes: Array<RouteRecordRaw> = [
@@ -32,9 +32,9 @@ const routes: Array<RouteRecordRaw> = [
         component: Prepare1
     },
     {
-        path: '/Prepare2',
-        name: 'Prepare2',
-        component: Prepare2
+        path: '/Choice',
+        name: 'Choice',
+        component: Choice
     }
 ];
 

@@ -7,9 +7,9 @@
         <span class="nav-item" @click="navigateTo('home')">我的报告</span>
         <span class="nav-item" @click="navigateTo('learning')">学习中心</span>
 
-        <button>开始面试</button>
+        <button @click="routerPlease()" >选择岗位</button>
 
-        <img src="../assets//images/头像.png" alt="" />
+        <img src="../assets//images/avator.png" alt="" />
       </div>
     </div>
 
@@ -253,8 +253,8 @@
         <!-- 信息区域 -->
         <div class="footer-info">
           <span>咨询时间: 工作日9点-11点 14点-17点</span>
-          <span>技术支持: 广东海洋大学CPP团队</span>
-          <span>@2025某某面试 中国软件杯大赛参赛作品</span>
+          <span></span>
+          <span></span>
           <!-- <span></span> -->
           <span>邮编: 10046</span>
         </div>
@@ -436,6 +436,12 @@ const navigateTo = (path: string) => {
   // 路由跳转逻辑
   console.log(`导航到: ${path}`);
 };
+
+import { useRouter } from 'vue-router';
+const router = useRouter()
+const routerPlease=()=>{
+router.push('/Choice');
+}
 </script>
 
 <style lang="scss" scoped>

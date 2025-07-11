@@ -79,7 +79,7 @@ const loginForm = ref({
   verificationCode: '',
   rememberPassword: false,
 });
-msg.data
+
 const verificationCodeValue = ref('1808'); // 模拟验证码值，实际从后端获取
 
 // 刷新验证码（模拟逻辑，实际需调用后端接口）
