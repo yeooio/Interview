@@ -73,10 +73,10 @@
           
           <!-- 回答建议 -->
           <div class="advice-section">
-            <img src="../assets/images/advice-icon.png" alt="Advice">
+            <img src="../assets/images/回答建议.png" alt="Advice">
             <div class="advice-list">
               <li v-for="(tip, index) in adviceTips" :key="index">
-                <img :src="`../assets/images/number-${index+1}.png`" alt=""> {{ tip }}
+                <img :src="`/src/assets/images/${index + 1}.png`" alt="tip"> {{ tip }}
               </li>
             </div>
           </div>
@@ -121,6 +121,29 @@
 
 <script setup lang="ts">
 
+
+
+const countdown = ref(45); // 45秒倒计时
+const countdownInterval = ref<number | null>(null); // 倒计时定时器
+const tempQuestion = ref(''); // 临时存储获取的新问题
+const tempAdviceTips = ref<string[]>([]); // 临时存储获取的新建议
+
+
+
+
+
+const formatTime = (seconds: number): string => {
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+}
+
+
+
+
+
+
+
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import * as echarts from 'echarts'
 import { msrFace, msrVoice } from '../api/modules/interview'
@@ -152,8 +175,7 @@ const currentQuestion = ref('请描述一次你解决复杂技术问题的经历
 const adviceTips = ref([
   '从问题背景入手，说明问题的复杂性和挑战',
   '详细描述你的解决思路和技术选型原因',
-  '说明最终方案的效果和你从中学到了什么',
-  '可以提及团队协作和沟通方面的经验'
+  '说明最终方案的效果和你从中学到了什么'
 ])
 
 // ==================== 定时器和WebSocket ====================
@@ -431,6 +453,28 @@ const startInterview = async () => {
     console.log("开始面试流程...")
     isInterviewing.value = true
     
+
+    countdown.value = 45;
+    formattedTime.value = formatTime(countdown.value);
+    
+    // 启动倒计时
+    if (countdownInterval.value) clearInterval(countdownInterval.value);
+    countdownInterval.value = setInterval(() => {
+      countdown.value--;
+      formattedTime.value = formatTime(countdown.value);
+      
+      // 当倒计时达到15秒时获取新问题
+      if (countdown.value === 15) {
+        getInterviewQuestion();
+      }
+      
+      // 倒计时结束自动停止
+      if (countdown.value <= 0) {
+        stopInterview();
+      }
+    }, 1000);
+
+
     if (!mediaStream.value) {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ 
@@ -573,7 +617,18 @@ const startInterview = async () => {
 
 const stopInterview = () => {
   isInterviewing.value = false
+  if (countdownInterval.value) {
+    clearInterval(countdownInterval.value);
+    countdownInterval.value = null;
+  }
   
+  // 更新问题和建议（如果有新获取的）
+  if (tempQuestion.value) {
+    currentQuestion.value = tempQuestion.value;
+  }
+  if (tempAdviceTips.value.length > 0) {
+    adviceTips.value = tempAdviceTips.value;
+  }
   if (audioRecorder && audioRecorder.state !== 'inactive') {
     try {
       audioRecorder.stop()
@@ -671,7 +726,17 @@ const writeString = (view: DataView, offset: number, str: string) => {
 }
 
 // ==================== 生命周期钩子 ====================
-onMounted(() => {
+onMounted(async() => {
+  await getInterviewQuestion(); 
+     currentQuestion.value = tempQuestion.value
+     if (tempQuestion.value) {
+  currentQuestion.value = tempQuestion.value;
+}
+if (tempAdviceTips.value.length > 0) {
+  adviceTips.value = [...tempAdviceTips.value];
+}
+
+  
   if (!localStorage.getItem('token')) {
     localStorage.setItem('token', 'eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjEsInVzZXJuYW1lIjoi5YiY5amnIn0.CphWFNKqYpIZbmwu1efdtvi2jYzGQawz3yzRpHjLePA')
   }
@@ -689,6 +754,68 @@ onMounted(() => {
   }
 })
 
+
+
+
+
+
+
+import service from '@/api/request' // 导入请求服务
+
+
+
+
+
+const getInterviewQuestion = async () => {
+  try {
+    // 1. 获取固定位置的PDF文件
+    const pdfUrl = '/resumes/黑色极简个人求职简历.pdf'; // 假设PDF文件放在public/resumes目录下
+    
+    // 2. 获取PDF文件
+    const response = await fetch(pdfUrl);
+    const blob = await response.blob();
+    const file = new File([blob], '黑色极简个人求职简历.pdf', { type: 'application/pdf' });
+    
+    // 3. 创建FormData
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    // 4. 发送请求获取面试问题
+    const result = await service.post('/customer/interview/question', formData, {
+      params: { recordId: '8' }
+    });
+    console.log(result);
+    
+    console.log('面试问题获取成功:', result);
+    
+    // 5. 更新当前问题（假设接口返回数据结构）
+    if (result && result.data) {
+      // 问题
+      if (result.data.question) {
+        tempQuestion.value = result.data.question;
+      }
+      
+      // 建议 - 按照顺序组合成数组
+      const suggestions = [];
+      if (result.data.suggestOne) suggestions.push(result.data.suggestOne);
+      if (result.data.suggestTwo) suggestions.push(result.data.suggestTwo);
+      if (result.data.suggestThree) suggestions.push(result.data.suggestThree);
+      
+      tempAdviceTips.value = suggestions;
+    }
+  } catch (error) {
+    console.error('获取面试问题失败:', error);
+  }
+};
+
+// ==================== 生命周期钩子 ====================
+onMounted(async () => {
+  // 原有onMounted代码...
+  
+  // 新增：获取面试问题
+  
+  // 原有token设置...
+});
 onBeforeUnmount(() => {
   stopInterview()
   
