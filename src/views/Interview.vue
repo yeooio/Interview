@@ -78,8 +78,8 @@
             <img src="../assets/images/question-icon.png" alt="Question" />
             <div class="question">
               <h4>{{ currentQuestion }}</h4>
-              <el-button type="danger" class="origin-button"
-                >2023年字节真题</el-button
+              <el-button class="origin-button" :type="questionSources[currentSourceIndex].color"  
+                >{{ questionSources[currentSourceIndex].text }}</el-button
               >
             </div>
           </div>
@@ -104,13 +104,15 @@
             >
               <img src="../assets/images/start-icon.png" alt="Start" />开始回答
             </el-button>
+
             <el-button
               type="danger"
-              @click="stopInterview"
+              @click="stopCount < 2 ? stopInterview() : generateReport()"
               :disabled="!isInterviewing"
               class="action-button"
             >
-              <img src="../assets/images/stop-icon.png" alt="Stop" />停止回答
+              <img src="../assets/images/stop-icon.png" alt="Stop" />
+              {{ stopButtonText }}
             </el-button>
           </div>
         </div>
@@ -121,7 +123,7 @@
           <div class="right-panel">
             <div class="analyse">
               <div class="key">
-              <img src="../assets/images/Component 1.png" alt="" />
+                <img src="../assets/images/Component 1.png" alt="" />
               </div>
               <div class="card-container">
                 <div class="guage-card">
@@ -145,15 +147,33 @@
                   <div class="card">
                     <div class="card1">
                       <span class="fluer">平均语速</span>
-                      <span class="number">{{avgSpeed}}字/分</span>
-                      <span class="notice"  :data-status="getFillerStatus(fillerFreq) === '良好' ? 'good' : 
-               (getFillerStatus(fillerFreq) === '需注意' ? 'normal' : 'danger')">{{ getSpeedStatus(avgSpeed) }}</span>
+                      <span class="number">{{ avgSpeed }}字/分</span>
+                      <span
+                        class="notice"
+                        :data-status="
+                          getFillerStatus(fillerFreq) === '良好'
+                            ? 'good'
+                            : getFillerStatus(fillerFreq) === '需注意'
+                              ? 'normal'
+                              : 'danger'
+                        "
+                        >{{ getSpeedStatus(avgSpeed) }}</span
+                      >
                     </div>
                     <div class="card2">
                       <span class="fluer">语气词频率</span>
                       <span class="number">{{ fillerFreq }}次/分</span>
-                      <span class="notice" :data-status="getFillerStatus(fillerFreq) === '良好' ? 'good' : 
-               (getFillerStatus(fillerFreq) === '需注意' ? 'normal' : 'danger')" >{{ getFillerStatus(fillerFreq) }}</span>
+                      <span
+                        class="notice"
+                        :data-status="
+                          getFillerStatus(fillerFreq) === '良好'
+                            ? 'good'
+                            : getFillerStatus(fillerFreq) === '需注意'
+                              ? 'normal'
+                              : 'danger'
+                        "
+                        >{{ getFillerStatus(fillerFreq) }}</span
+                      >
                     </div>
                   </div>
                 </div>
@@ -176,15 +196,26 @@
                   </div>
                   <div class="card">
                     <div class="card1">
-                     <span class="fluer">眼神交流</span>
-    <span class="number">{{ eyeContact }}</span>
-    <span class="notice">{{ getEyeContactStatus(eyeContact) }}</span>
+                      <span class="fluer">眼神交流</span>
+                      <span class="number">{{ eyeContact }}</span>
+                      <span class="notice">{{
+                        getEyeContactStatus(eyeContact)
+                      }}</span>
                     </div>
                     <div class="card2">
-                   <span class="fluer">手势自然度</span>
-    <span class="number">{{ gestureNature }}</span>
-    <span class="notice" :data-status="getFillerStatus(fillerFreq) === '良好' ? 'good' : 
-               (getFillerStatus(fillerFreq) === '需注意' ? 'normal' : 'danger')">{{ getNatureStatus(gestureNature) }}</span>
+                      <span class="fluer">手势自然度</span>
+                      <span class="number">{{ gestureNature }}</span>
+                      <span
+                        class="notice"
+                        :data-status="
+                          getFillerStatus(fillerFreq) === '良好'
+                            ? 'good'
+                            : getFillerStatus(fillerFreq) === '需注意'
+                              ? 'normal'
+                              : 'danger'
+                        "
+                        >{{ getNatureStatus(gestureNature) }}</span
+                      >
                     </div>
                   </div>
 
@@ -210,14 +241,18 @@
                   </div>
                   <div class="card">
                     <div class="card1">
-                     <span class="fluer">STAR结构应用</span>
-    <span class="number">{{ starApplication }}</span>
-    <span class="notice">{{ getStarStatus(starApplication) }}</span>
+                      <span class="fluer">STAR结构应用</span>
+                      <span class="number">{{ starApplication }}</span>
+                      <span class="notice">{{
+                        getStarStatus(starApplication)
+                      }}</span>
                     </div>
                     <div class="card2">
-                    <span class="fluer">问题理解度</span>
-    <span class="number">{{ problemComprehension }}</span>
-    <span class="notice">{{ getComprehendStatus(problemComprehension) }}</span>
+                      <span class="fluer">问题理解度</span>
+                      <span class="number">{{ problemComprehension }}</span>
+                      <span class="notice">{{
+                        getComprehendStatus(problemComprehension)
+                      }}</span>
                     </div>
                   </div>
 
@@ -227,7 +262,7 @@
             </div>
             <div class="key-word">
               <div class="key">
-              <img src="../assets/images/Component 2.png" alt="" />
+                <img src="../assets/images/Component 2.png" alt="" />
               </div>
               <div class="box"></div>
             </div>
@@ -239,15 +274,21 @@
 </template>
 
 <script setup lang="ts">
+const stopCount = ref(0);
+const questionSources = ref([
+  { text: '2024年字节真题', color: 'danger' }, // 红色
+  { text: '2023年腾讯真题', color: 'warning' }, // 黄色
+  { text: '2025年阿里真题', color: 'success' }  // 绿色
+]);
+const currentSourceIndex = ref(0);
+
 // 只需要这6个变量
-const avgSpeed = ref(0);        // 平均语速（voice.frame.speed）
-const fillerFreq = ref(0);      // 语气词频率（voice.frame.filler）
-const eyeContact = ref("0%");   // 眼神交流（face.frame.eye）
+const avgSpeed = ref(0); // 平均语速（voice.frame.speed）
+const fillerFreq = ref(0); // 语气词频率（voice.frame.filler）
+const eyeContact = ref('0%'); // 眼神交流（face.frame.eye）
 const gestureNature = ref('无'); // 手势自然度（face.frame.nature）
-const starApplication = ref('0%');  // STAR结构应用（word.frame.star）
+const starApplication = ref('0%'); // STAR结构应用（word.frame.star）
 const problemComprehension = ref('0%'); // 问题理解度（word.frame.comprehend）
-
-
 
 import { ref, onMounted, onBeforeUnmount, computed } from 'vue';
 import * as echarts from 'echarts';
@@ -348,7 +389,7 @@ const initRingsChart = () => {
           overlap: false,
           roundCap: true,
           clip: false,
-          itemStyle: { borderWidth: 1, borderColor: '#464646' }
+          itemStyle: { borderWidth: 1, borderColor: '#464646' },
         },
         axisLine: { lineStyle: { width: 10 } },
         splitLine: { show: false, distance: 0, length: 10 },
@@ -364,10 +405,10 @@ const initRingsChart = () => {
               show: false, // 直接隐藏
               valueAnimation: true,
               offsetCenter: ['0%', '-20%'],
-              formatter: '' // 或设为空字符串
+              formatter: '', // 或设为空字符串
             },
             itemStyle: { color: '#5470C6' },
-            radius: '60%' // 调整半径
+            radius: '60%', // 调整半径
           },
           {
             value: voiceData.value.logic,
@@ -377,10 +418,10 @@ const initRingsChart = () => {
               show: false,
               valueAnimation: true,
               offsetCenter: ['0%', '10%'],
-              formatter: ''
+              formatter: '',
             },
             itemStyle: { color: '#91CC75' },
-            radius: '70%' // 调整半径
+            radius: '70%', // 调整半径
           },
           {
             value: voiceData.value.words,
@@ -390,11 +431,11 @@ const initRingsChart = () => {
               show: false,
               valueAnimation: true,
               offsetCenter: ['0%', '40%'],
-              formatter: ''
+              formatter: '',
             },
             itemStyle: { color: '#FAC858' },
-            radius: '80%' // 调整半径
-          }
+            radius: '80%', // 调整半径
+          },
         ],
         title: { fontSize: 14 },
         detail: {
@@ -404,10 +445,10 @@ const initRingsChart = () => {
           color: 'inherit',
           borderColor: 'inherit',
           borderRadius: 20,
-          borderWidth: 0
-        }
-      }
-    ]
+          borderWidth: 0,
+        },
+      },
+    ],
   };
 
   ringsChartInstance.setOption(option);
@@ -436,17 +477,16 @@ const updateRingsChart = () => {
 // 处理WebSocket消息
 // 语音消息处理
 const handleVoiceMessage = (data: any) => {
+  console.log('voice.data', data);
 
-  console.log("voice.data",data);
-  
   if (data.data?.vocie?.frame) {
     avgSpeed.value = data.data.vocie.frame.speed || 0;
     fillerFreq.value = data.data.vocie.frame.filler || 0;
   }
-  
+
   if (data.data?.word?.frame) {
-      starApplication.value = `${parseInt(data.data.word.frame.star) || 0}%`;        // STAR 结构应用：数字转字符串并拼接 %
-  problemComprehension.value = `${parseInt(data.data.word.frame.comprehend) || 0}%`; // 问题理解度：同上
+    starApplication.value = `${parseInt(data.data.word.frame.star) || 0}%`; // STAR 结构应用：数字转字符串并拼接 %
+    problemComprehension.value = `${parseInt(data.data.word.frame.comprehend) || 0}%`; // 问题理解度：同上
   }
 };
 
@@ -454,14 +494,14 @@ const handleVoiceMessage = (data: any) => {
 const handleFaceMessage = (event: MessageEvent) => {
   try {
     const data = event.data;
-    console.log("face.data",data);
-    
+    console.log('face.data', data);
+
     if (data.face.frame) {
-      console.log("1111");
-      
-        eyeContact.value = `${parseInt(data.face.frame.eye) || 0}%`; 
-        console.log("eye",eyeContact.value);
-        
+      console.log('1111');
+
+      eyeContact.value = `${parseInt(data.face.frame.eye) || 0}%`;
+      console.log('eye', eyeContact.value);
+
       // eyeContact.value = parseInt(data.data.face.frame.eye) || '0%';
       gestureNature.value = data.face.frame.nature || '无';
     }
@@ -469,8 +509,6 @@ const handleFaceMessage = (event: MessageEvent) => {
     console.error('解析人脸数据失败:', error);
   }
 };
-
-
 
 // 不需要返回状态类名，直接返回文本
 const getSpeedStatus = (speed: number) => {
@@ -676,12 +714,11 @@ const createWebSockets = () => {
 
   faceSocket.onmessage = event => {
     try {
-        const data = JSON.parse(event.data);
-        console.log("face.date:",data);
-        handleFaceMessage(data)
-        
-      console.log('收到人脸分析结果:', event.data);
+      const data = JSON.parse(event.data);
+      console.log('face.date:', data);
+      handleFaceMessage(data);
 
+      console.log('收到人脸分析结果:', event.data);
     } catch (error) {
       console.error('解析人脸分析数据失败:', error);
     }
@@ -737,7 +774,7 @@ const getFillerStatusText = (filler: number) => {
 
 // 开始面试
 const startInterview = async () => {
-    startGaugesAnimation(); 
+  startGaugesAnimation();
   try {
     console.log('开始面试流程...');
     isInterviewing.value = true;
@@ -943,7 +980,10 @@ const startInterview = async () => {
 
 // 停止面试
 const stopInterview = () => {
-    stopGaugesAnimation();
+  console.log("hhh");
+  
+  isInterviewing.value = false;
+  stopGaugesAnimation();
   if (countdownInterval.value) {
     clearInterval(countdownInterval.value);
     countdownInterval.value = null;
@@ -1001,8 +1041,27 @@ const stopInterview = () => {
   }
 
   audioData.value = [];
-};
 
+  stopCount.value++;
+  
+  // 自动开始下一题，直到第三题
+  // console.log("interview",isInterviewing.value);
+  currentSourceIndex.value = (currentSourceIndex.value + 1) % questionSources.value.length;
+
+  
+
+  
+};
+const generateReport = () => {
+  console.log('生成模拟报告');
+  // 这里可以添加实际的报告生成逻辑
+  // 例如：跳转到报告页面 this.$router.push('/report');
+  
+  // 重置状态以便再次开始
+  stopCount.value = 0;
+  isInterviewing.value = false;
+  currentQuestion.value = '';
+};
 // 编码音频数据为WAV格式
 const encodeToWav = (audioChunks: Float32Array[]): Blob => {
   const sampleRate = 44100;
@@ -1056,6 +1115,10 @@ const writeString = (view: DataView, offset: number, str: string) => {
     view.setUint8(offset + i, str.charCodeAt(i));
   }
 };
+
+const stopButtonText = computed(() => {
+  return stopCount.value < 2 ? '停止回答' : '生成模拟报告';
+});
 
 // 获取面试问题
 const getInterviewQuestion = async () => {
@@ -1142,162 +1205,159 @@ onMounted(async () => {
   initRingsChart();
 });
 
-
-
-
 // 修改前的版本
 const gauge1Ref = ref<HTMLElement | null>(null);
 const gauge2Ref = ref<HTMLElement | null>(null);
 const gauge3Ref = ref<HTMLElement | null>(null);
 
-const initGauges = () => {
-  // 确保DOM元素已挂载
-  if (!gauge1Ref.value || !gauge2Ref.value || !gauge3Ref.value) {
-    console.error('Gauge elements not found');
-    return;
-  }
+// const initGauges = () => {
+//   // 确保DOM元素已挂载
+//   if (!gauge1Ref.value || !gauge2Ref.value || !gauge3Ref.value) {
+//     console.error('Gauge elements not found');
+//     return;
+//   }
 
-  // 初始化ECharts实例
-  const chart1 = echarts.init(gauge1Ref.value);
-  const chart2 = echarts.init(gauge2Ref.value);
-  const chart3 = echarts.init(gauge3Ref.value);
+//   // 初始化ECharts实例
+//   const chart1 = echarts.init(gauge1Ref.value);
+//   const chart2 = echarts.init(gauge2Ref.value);
+//   const chart3 = echarts.init(gauge3Ref.value);
 
-  // 创建仪表盘配置函数
-  const createGaugeOption = (gaugeData: any[]) => {
-    return {
-      series: [
-        {
-          type: 'gauge',
-          startAngle: 90,
-          endAngle: -270,
-          pointer: { show: false },
-          progress: {
-            show: true,
-            overlap: false,
-            roundCap: true,
-            clip: false,
-            itemStyle: {
-              borderWidth: 1,
-              borderColor: '#464646',
-            },
-          },
-          axisLine: { lineStyle: { width: 40 } },
-          splitLine: { show: false, distance: 0, length: 10 },
-          axisTick: { show: false },
-          axisLabel: { show: false, distance: 50 },
-          data: gaugeData,
-          title: { fontSize: 14 },
-          detail: {
-            width: 50,
-            height: 14,
-            fontSize: 14,
-            color: 'inherit',
-            borderColor: 'inherit',
-            borderRadius: 20,
-            borderWidth: 1,
-            formatter: '{value}%',
-          },
-        },
-      ],
-    };
-  };
+//   // 创建仪表盘配置函数
+//   const createGaugeOption = (gaugeData: any[]) => {
+//     return {
+//       series: [
+//         {
+//           type: 'gauge',
+//           startAngle: 90,
+//           endAngle: -270,
+//           pointer: { show: false },
+//           progress: {
+//             show: true,
+//             overlap: false,
+//             roundCap: true,
+//             clip: false,
+//             itemStyle: {
+//               borderWidth: 1,
+//               borderColor: '#464646',
+//             },
+//           },
+//           axisLine: { lineStyle: { width: 40 } },
+//           splitLine: { show: false, distance: 0, length: 10 },
+//           axisTick: { show: false },
+//           axisLabel: { show: false, distance: 50 },
+//           data: gaugeData,
+//           title: { fontSize: 14 },
+//           detail: {
+//             width: 50,
+//             height: 14,
+//             fontSize: 14,
+//             color: 'inherit',
+//             borderColor: 'inherit',
+//             borderRadius: 20,
+//             borderWidth: 1,
+//             formatter: '{value}%',
+//           },
+//         },
+//       ],
+//     };
+//   };
 
-  // 创建仪表盘数据
-  const createGaugeData = () => {
-    return [
-      {
-        value: +(Math.random() * 100).toFixed(2),
-        name: '',
-        title: { offsetCenter: ['0%', '-30%'] },
-        detail: {
-          valueAnimation: true,
-          offsetCenter: ['0%', '-20%'],
-          color: '#5470C6',
-        },
-        itemStyle: { color: '#3A82FF' },
-      },
-      {
-        value: +(Math.random() * 100).toFixed(2),
-        name: '',
-        title: { offsetCenter: ['0%', '0%'] },
-        detail: {
-          valueAnimation: true,
-          offsetCenter: ['0%', '10%'],
-          color: '#91CC75',
-        },
-        itemStyle: { color: '#FFDD36' },
-      },
-      {
-        value: +(Math.random() * 100).toFixed(2),
-        name: '',
-        title: { offsetCenter: ['0%', '30%'] },
-        detail: {
-          valueAnimation: true,
-          offsetCenter: ['0%', '40%'],
-          color: '#FAC858',
-        },
-        itemStyle: { color: '#4EFF8F' },
-      },
-    ];
-  };
+//   // 创建仪表盘数据
+//   const createGaugeData = () => {
+//     return [
+//       {
+//         value: +(Math.random() * 100).toFixed(2),
+//         name: '',
+//         title: { offsetCenter: ['0%', '-30%'] },
+//         detail: {
+//           valueAnimation: true,
+//           offsetCenter: ['0%', '-20%'],
+//           color: '#5470C6',
+//         },
+//         itemStyle: { color: '#3A82FF' },
+//       },
+//       {
+//         value: +(Math.random() * 100).toFixed(2),
+//         name: '',
+//         title: { offsetCenter: ['0%', '0%'] },
+//         detail: {
+//           valueAnimation: true,
+//           offsetCenter: ['0%', '10%'],
+//           color: '#91CC75',
+//         },
+//         itemStyle: { color: '#FFDD36' },
+//       },
+//       {
+//         value: +(Math.random() * 100).toFixed(2),
+//         name: '',
+//         title: { offsetCenter: ['0%', '30%'] },
+//         detail: {
+//           valueAnimation: true,
+//           offsetCenter: ['0%', '40%'],
+//           color: '#FAC858',
+//         },
+//         itemStyle: { color: '#4EFF8F' },
+//       },
+//     ];
+//   };
 
-  // 初始化仪表盘数据
-  let gaugeData1 = createGaugeData();
-  let gaugeData2 = createGaugeData();
-  let gaugeData3 = createGaugeData();
+//   // 初始化仪表盘数据
+//   let gaugeData1 = createGaugeData();
+//   let gaugeData2 = createGaugeData();
+//   let gaugeData3 = createGaugeData();
 
-  // 应用配置
-  chart1.setOption(createGaugeOption(gaugeData1));
-  chart2.setOption(createGaugeOption(gaugeData2));
-  chart3.setOption(createGaugeOption(gaugeData3));
+//   // 应用配置
+//   chart1.setOption(createGaugeOption(gaugeData1));
+//   chart2.setOption(createGaugeOption(gaugeData2));
+//   chart3.setOption(createGaugeOption(gaugeData3));
 
-  // 设置定时更新
-  const gaugeTimer1 = setInterval(() => {
-    gaugeData1[0].value = +(Math.random() * 100).toFixed(2);
-    gaugeData1[1].value = +(Math.random() * 100).toFixed(2);
-    gaugeData1[2].value = +(Math.random() * 100).toFixed(2);
-    chart1.setOption({
-      series: [{ data: gaugeData1 }],
-    });
-  }, 2000);
+//   // 设置定时更新
+//   const gaugeTimer1 = setInterval(() => {
+//     gaugeData1[0].value = +(Math.random() * 100).toFixed(2);
+//     gaugeData1[1].value = +(Math.random() * 100).toFixed(2);
+//     gaugeData1[2].value = +(Math.random() * 100).toFixed(2);
+//     chart1.setOption({
+//       series: [{ data: gaugeData1 }],
+//     });
+//   }, 2000);
 
-  const gaugeTimer2 = setInterval(() => {
-    gaugeData2[0].value = +(Math.random() * 100).toFixed(2);
-    gaugeData2[1].value = +(Math.random() * 100).toFixed(2);
-    gaugeData2[2].value = +(Math.random() * 100).toFixed(2);
-    chart2.setOption({
-      series: [{ data: gaugeData2 }],
-    });
-  }, 3000);
+//   const gaugeTimer2 = setInterval(() => {
+//     gaugeData2[0].value = +(Math.random() * 100).toFixed(2);
+//     gaugeData2[1].value = +(Math.random() * 100).toFixed(2);
+//     gaugeData2[2].value = +(Math.random() * 100).toFixed(2);
+//     chart2.setOption({
+//       series: [{ data: gaugeData2 }],
+//     });
+//   }, 3000);
 
-  const gaugeTimer3 = setInterval(() => {
-    gaugeData3[0].value = +(Math.random() * 100).toFixed(2);
-    gaugeData3[1].value = +(Math.random() * 100).toFixed(2);
-    gaugeData3[2].value = +(Math.random() * 100).toFixed(2);
-    chart3.setOption({
-      series: [{ data: gaugeData3 }],
-    });
-  }, 3500);
+//   const gaugeTimer3 = setInterval(() => {
+//     gaugeData3[0].value = +(Math.random() * 100).toFixed(2);
+//     gaugeData3[1].value = +(Math.random() * 100).toFixed(2);
+//     gaugeData3[2].value = +(Math.random() * 100).toFixed(2);
+//     chart3.setOption({
+//       series: [{ data: gaugeData3 }],
+//     });
+//   }, 3500);
 
-  // 响应式调整
-  const handleResize = () => {
-    chart1.resize();
-    chart2.resize();
-    chart3.resize();
-  };
-  window.addEventListener('resize', handleResize);
+//   // 响应式调整
+//   const handleResize = () => {
+//     chart1.resize();
+//     chart2.resize();
+//     chart3.resize();
+//   };
+//   window.addEventListener('resize', handleResize);
 
-  // 在卸载时清理资源
-  onBeforeUnmount(() => {
-    clearInterval(gaugeTimer1);
-    clearInterval(gaugeTimer2);
-    clearInterval(gaugeTimer3);
-    window.removeEventListener('resize', handleResize);
-    chart1.dispose();
-    chart2.dispose();
-    chart3.dispose();
-  });
-};
+//   // 在卸载时清理资源
+//   onBeforeUnmount(() => {
+//     clearInterval(gaugeTimer1);
+//     clearInterval(gaugeTimer2);
+//     clearInterval(gaugeTimer3);
+//     window.removeEventListener('resize', handleResize);
+//     chart1.dispose();
+//     chart2.dispose();
+//     chart3.dispose();
+//   });
+// };
 // 修改前end
 
 const chart1 = ref<echarts.ECharts | null>(null);
@@ -1306,9 +1366,196 @@ const chart3 = ref<echarts.ECharts | null>(null);
 const gaugeTimer1 = ref<NodeJS.Timeout | null>(null);
 const gaugeTimer2 = ref<NodeJS.Timeout | null>(null);
 const gaugeTimer3 = ref<NodeJS.Timeout | null>(null);
+const createGaugeOption = (gaugeData: any[]) => {
+  return {
+    series: [
+      {
+        type: 'gauge',
+        startAngle: 90,
+        endAngle: -270,
+        pointer: { show: false },
+        progress: {
+          show: true,
+          overlap: false,
+          roundCap: true,
+          clip: false,
+          itemStyle: {
+            borderWidth: 1,
+            borderColor: '#464646',
+          },
+        },
+        axisLine: { lineStyle: { width: 40 } },
+        splitLine: { show: false, distance: 0, length: 10 },
+        axisTick: { show: false },
+        axisLabel: { show: false, distance: 50 },
+        data: gaugeData,
+        title: { fontSize: 14 },
+        detail: {
+          width: 50,
+          height: 14,
+          fontSize: 14,
+          color: 'inherit',
+          borderColor: 'inherit',
+          borderRadius: 20,
+          borderWidth: 1,
+          formatter: '{value}%',
+        },
+      },
+    ],
+  };
+};
 
+// 创建仪表盘数据（与原始代码完全一致）
+const createGaugeData = () => {
+  return [
+    {
+      value: +(Math.random() * 100).toFixed(2),
+      name: '',
+      title: { offsetCenter: ['0%', '-30%'] },
+      detail: {
+        valueAnimation: true,
+        offsetCenter: ['0%', '-20%'],
+        color: '#5470C6',
+      },
+      itemStyle: { color: '#3A82FF' },
+    },
+    {
+      value: +(Math.random() * 100).toFixed(2),
+      name: '',
+      title: { offsetCenter: ['0%', '0%'] },
+      detail: {
+        valueAnimation: true,
+        offsetCenter: ['0%', '10%'],
+        color: '#91CC75',
+      },
+      itemStyle: { color: '#FFDD36' },
+    },
+    {
+      value: +(Math.random() * 100).toFixed(2),
+      name: '',
+      title: { offsetCenter: ['0%', '30%'] },
+      detail: {
+        valueAnimation: true,
+        offsetCenter: ['0%', '40%'],
+        color: '#FAC858',
+      },
+      itemStyle: { color: '#4EFF8F' },
+    },
+  ];
+};
 
+// 创建初始数据（值为0）
+const createInitialGaugeData = () => {
+  return [
+    {
+      value: 0,
+      name: '',
+      title: { offsetCenter: ['0%', '-30%'] },
+      detail: {
+        valueAnimation: true,
+        offsetCenter: ['0%', '-20%'],
+        color: '#5470C6',
+      },
+      itemStyle: { color: '#3A82FF' },
+    },
+    {
+      value: 0,
+      name: '',
+      title: { offsetCenter: ['0%', '0%'] },
+      detail: {
+        valueAnimation: true,
+        offsetCenter: ['0%', '10%'],
+        color: '#91CC75',
+      },
+      itemStyle: { color: '#FFDD36' },
+    },
+    {
+      value: 0,
+      name: '',
+      title: { offsetCenter: ['0%', '30%'] },
+      detail: {
+        valueAnimation: true,
+        offsetCenter: ['0%', '40%'],
+        color: '#FAC858',
+      },
+      itemStyle: { color: '#4EFF8F' },
+    },
+  ];
+};
 
+// 启动仪表盘动画
+const startGaugesAnimation = () => {
+  if (!chart1.value || !chart2.value || !chart3.value) return;
+
+  // 清除可能存在的旧定时器
+  stopGaugesAnimation();
+
+  // 为每个仪表盘设置定时器
+  gaugeTimer1.value = setInterval(() => {
+    if (chart1.value) {
+      const newData = createGaugeData();
+      chart1.value.setOption({
+        series: [{ data: newData }],
+      });
+    }
+  }, 2000);
+
+  gaugeTimer2.value = setInterval(() => {
+    if (chart2.value) {
+      const newData = createGaugeData();
+      chart2.value.setOption({
+        series: [{ data: newData }],
+      });
+    }
+  }, 3000);
+
+  gaugeTimer3.value = setInterval(() => {
+    if (chart3.value) {
+      const newData = createGaugeData();
+      chart3.value.setOption({
+        series: [{ data: newData }],
+      });
+    }
+  }, 3500);
+};
+
+// 停止仪表盘动画并重置为0
+const stopGaugesAnimation = () => {
+  // 清除所有定时器
+  if (gaugeTimer1.value) clearInterval(gaugeTimer1.value);
+  if (gaugeTimer2.value) clearInterval(gaugeTimer2.value);
+  if (gaugeTimer3.value) clearInterval(gaugeTimer3.value);
+
+  gaugeTimer1.value = null;
+  gaugeTimer2.value = null;
+  gaugeTimer3.value = null;
+
+  // 重置仪表盘为0（使用原始配置）
+  const resetData = createInitialGaugeData();
+
+  if (chart1.value) chart1.value.setOption({ series: [{ data: resetData }] });
+  if (chart2.value) chart2.value.setOption({ series: [{ data: resetData }] });
+  if (chart3.value) chart3.value.setOption({ series: [{ data: resetData }] });
+};
+
+// 修改initGauges函数
+const initGauges = () => {
+  // 确保DOM元素已挂载
+  if (!gauge1Ref.value || !gauge2Ref.value || !gauge3Ref.value) {
+    console.error('Gauge elements not found');
+    return;
+  }
+
+  // 初始化ECharts实例
+  chart1.value = echarts.init(gauge1Ref.value);
+  chart2.value = echarts.init(gauge2Ref.value);
+  chart3.value = echarts.init(gauge3Ref.value);
+
+  // 应用初始配置（值为0）
+  chart1.value.setOption(createGaugeOption(createInitialGaugeData()));
+  chart2.value.setOption(createGaugeOption(createInitialGaugeData()));
+  chart3.value.setOption(createGaugeOption(createInitialGaugeData()));
+};
 
 // 创建仪表盘配置函数
 // const createGaugeOption = (gaugeData: any[]) => {
@@ -1392,11 +1639,11 @@ const gaugeTimer3 = ref<NodeJS.Timeout | null>(null);
 // // 初始化仪表盘
 // const initGauges = () => {
 //   if (!gauge1Ref.value || !gauge2Ref.value || !gauge3Ref.value) return;
-  
+
 //   chart1.value = echarts.init(gauge1Ref.value);
 //   chart2.value = echarts.init(gauge2Ref.value);
 //   chart3.value = echarts.init(gauge3Ref.value);
-  
+
 //   const gaugeData = createGaugeData();
 //   chart1.value.setOption(createGaugeOption(gaugeData));
 //   chart2.value.setOption(createGaugeOption(gaugeData));
@@ -1406,7 +1653,7 @@ const gaugeTimer3 = ref<NodeJS.Timeout | null>(null);
 // // 启动仪表盘动画
 // const startGaugesAnimation = () => {
 //   if (!chart1.value || !chart2.value || !chart3.value) return;
-  
+
 //   const updateGauge = (chart: echarts.ECharts) => {
 //     const newData = createGaugeData().map(item => ({
 //       ...item,
@@ -1416,10 +1663,10 @@ const gaugeTimer3 = ref<NodeJS.Timeout | null>(null);
 //       series: [{ data: newData }]
 //     });
 //   };
-  
+
 //   // 清除之前的定时器
 //   stopGaugesAnimation();
-  
+
 //   // 启动新的定时器
 //   gaugeTimer1.value = setInterval(() => updateGauge(chart1.value, 2000));
 //   gaugeTimer2.value = setInterval(() => updateGauge(chart2.value, 3000));
@@ -1432,11 +1679,11 @@ const gaugeTimer3 = ref<NodeJS.Timeout | null>(null);
 //   if (gaugeTimer1.value) clearInterval(gaugeTimer1.value);
 //   if (gaugeTimer2.value) clearInterval(gaugeTimer2.value);
 //   if (gaugeTimer3.value) clearInterval(gaugeTimer3.value);
-  
+
 //   gaugeTimer1.value = null;
 //   gaugeTimer2.value = null;
 //   gaugeTimer3.value = null;
-  
+
 //   // 重置仪表盘为0
 //   if (chart1.value && chart2.value && chart3.value) {
 //     const zeroData = createGaugeData().map(item => ({ ...item, value: 0 }));
@@ -1445,13 +1692,6 @@ const gaugeTimer3 = ref<NodeJS.Timeout | null>(null);
 //     chart3.value.setOption({ series: [{ data: zeroData }] });
 //   }
 // };
-
-
-
-
-
-
-
 
 onBeforeUnmount(() => {
   stopInterview();
@@ -1472,24 +1712,30 @@ onBeforeUnmount(() => {
 </script>
 <style scoped>
 /* 仪表盘容器 */
-.notice[data-status="good"] { color: #52c41a; }
-.notice[data-status="normal"] { color: #faad14; }
-.notice[data-status="danger"] { color: #f5222d; }
+.notice[data-status='good'] {
+  color: #52c41a;
+}
+.notice[data-status='normal'] {
+  color: #faad14;
+}
+.notice[data-status='danger'] {
+  color: #f5222d;
+}
 
-.key{
+.key {
   display: flex;
   /* gap: 20px; */
   margin-bottom: 10px;
 }
-.key-word{
-  margin: 20px 0 10px 0 ;
+.key-word {
+  margin: 20px 0 10px 0;
 }
-.box{
-  width:552px ;
+.box {
+  width: 552px;
   height: 107px;
   border-radius: 8px;
-  background-color: #F0F5FF;
-  border: 1px solid #C2ECFF;
+  background-color: #f0f5ff;
+  border: 1px solid #c2ecff;
 }
 .gauge1,
 .gauge2,
@@ -2018,7 +2264,7 @@ onBeforeUnmount(() => {
     padding: 0px 20px;
     box-sizing: border-box;
     .el-button {
-      background-color: #ff4444;
+      // background-color: #ff4444;
       width: 110px;
       height: 22px;
       font-size: 12px;
