@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>多环仪表盘展示</title>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #1a2a6c, #0d1b2a);
+      color: #fff;
+      min-height: 100vh;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+      padding: 20px;
+      max-width: 800px;
+    }
+
+    h1 {
+      font-size: 2.8rem;
+      margin-bottom: 15px;
+      background: linear-gradient(to right, #4facfe, #00f2fe);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 10px rgba(79, 172, 254, 0.5);
+      letter-spacing: 1px;
+    }
+
+    .subtitle {
+      font-size: 1.2rem;
+      color: #c5c8cc;
+      max-width: 800px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    .dashboard-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 40px;
+      margin: 30px 0 60px;
+      max-width: 1400px;
+    }
+
+    .gauge-card {
+      background: rgba(25, 35, 70, 0.6);
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(100, 140, 240, 0.2);
+      transition: all 0.3s ease;
+      width: 420px;
+    }
+
+    .gauge-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 15px 45px rgba(0, 100, 255, 0.3);
+    }
+
+    .card-header {
+      text-align: center;
+      padding-bottom: 20px;
+      margin-bottom: 15px;
+      border-bottom: 2px solid rgba(100, 140, 240, 0.2);
+    }
+
+    .card-title {
+      font-size: 1.8rem;
+      font-weight: 600;
+      color: #e0e6ff;
+      margin-bottom: 10px;
+    }
+
+    .card-subtitle {
+      font-size: 1rem;
+      color: #8c9bb4;
+    }
+
+    .gauge-wrapper {
+      width: 100%;
+      height: 320px;
+      position: relative;
+    }
+
+    .chart-container {
+      width: 100%;
+      height: 100%;
+    }
+
+    .info-panel {
+      background: rgba(25, 35, 70, 0.6);
+      border-radius: 16px;
+      padding: 25px;
+      margin: 40px auto 30px;
+      max-width: 900px;
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(100, 140, 240, 0.2);
+    }
+
+    .info-title {
+      font-size: 1.6rem;
+      text-align: center;
+      margin-bottom: 25px;
+      color: #4facfe;
+      font-weight: 600;
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+    }
+
+    .feature {
+      background: rgba(30, 40, 80, 0.7);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+      border-top: 3px solid;
+    }
+
+    .feature-1 {
+      border-top-color: #5470C6;
+    }
+
+    .feature-2 {
+      border-top-color: #91CC75;
+    }
+
+    .feature-3 {
+      border-top-color: #FAC858;
+    }
+
+    .feature-icon {
+      font-size: 2.2rem;
+      margin-bottom: 15px;
+      color: #00f2fe;
+    }
+
+    .feature-title {
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #c5c8cc;
+      font-size: 1.3rem;
+    }
+
+    .feature-desc {
+      font-size: 0.95rem;
+      color: #8c9bb4;
+      line-height: 1.6;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 20px;
+      color: #8c9bb4;
+      font-size: 0.95rem;
+      padding: 20px;
+    }
+
+    .highlight {
+      color: #4facfe;
+      font-weight: 600;
+    }
+
+    @media (max-width: 1200px) {
+      .dashboard-container {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .gauge-card {
+        width: 90%;
+        max-width: 500px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>多环仪表盘展示系统</h1>
+    <p class="subtitle">基于ECharts实现的三环独立仪表盘，精确还原完美、良好、普通三层性能指标的可视化展示。每个仪表盘具有独立的数据和更新机制。</p>
+  </header>
+
+  <div class="dashboard-container">
+    <div class="gauge-card">
+      <div class="card-header">
+        <h2 class="card-title">性能分析仪表盘</h2>
+        <p class="card-subtitle">系统整体性能指标监控</p>
+      </div>
+      <div class="gauge-wrapper">
+        <div id="gauge1" class="chart-container"></div>
+      </div>
+    </div>
+
+    <div class="gauge-card">
+      <div class="card-header">
+        <h2 class="card-title">资源利用仪表盘</h2>
+        <p class="card-subtitle">服务器资源利用率监控</p>
+      </div>
+      <div class="gauge-wrapper">
+        <div id="gauge2" class="chart-container"></div>
+      </div>
+    </div>
+
+    <div class="gauge-card">
+      <div class="card-header">
+        <h2 class="card-title">健康状态仪表盘</h2>
+        <p class="card-subtitle">系统健康状况实时监测</p>
+      </div>
+      <div class="gauge-wrapper">
+        <div id="gauge3" class="chart-container"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-panel">
+    <h3 class="info-title">系统特性</h3>
+    <div class="features">
+      <div class="feature feature-1">
+        <div class="feature-icon">⚙️</div>
+        <div class="feature-title">完美性能指标</div>
+        <div class="feature-desc">外层蓝色环表示系统在<span class="highlight">高负载</span>下的性能表现，目标值应保持在80%以上，确保核心功能稳定运行</div>
+      </div>
+
+      <div class="feature feature-2">
+        <div class="feature-icon">📈</div>
+        <div class="feature-title">良好运行指标</div>
+        <div class="feature-desc">中层绿色环展示系统<span class="highlight">常规运行</span>效率，反映日常操作的处理能力，理想值为90%左右</div>
+      </div>
+
+      <div class="feature feature-3">
+        <div class="feature-icon">📊</div>
+        <div class="feature-title">普通基线指标</div>
+        <div class="feature-desc">内层黄色环代表系统<span class="highlight">最低可接受</span>性能，低于50%表明需要立即干预和优化</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    三环独立仪表盘监控系统 | 基于ECharts 5.4.3 | 每2秒更新一次数据
+  </div>
+
+  <script>
+    // 初始化图表实例
+    const chart1 = echarts.init(document.getElementById('gauge1'));
+    const chart2 = echarts.init(document.getElementById('gauge2'));
+    const chart3 = echarts.init(document.getElementById('gauge3'));
+
+    // 创建与图片中完全相同的仪表盘配置
+    const createGaugeOption = (gaugeData) => {
+      return {
+        series: [
+          {
+            type: 'gauge',
+            startAngle: 90,
+            endAngle: -270,
+            pointer: {
+              show: false
+            },
+            progress: {
+              show: true,
+              overlap: false,
+              roundCap: true,
+              clip: false,
+              itemStyle: {
+                borderWidth: 1,
+                borderColor: '#464646'
+              }
+            },
+            axisLine: {
+              lineStyle: {
+                width: 40
+              }
+            },
+            splitLine: {
+              show: false,
+              distance: 0,
+              length: 10
+            },
+            axisTick: {
+              show: false
+            },
+            axisLabel: {
+              show: false,
+              distance: 50
+            },
+            data: gaugeData,
+            title: {
+              fontSize: 14
+            },
+            detail: {
+              width: 50,
+              height: 14,
+              fontSize: 14,
+              color: 'inherit',
+              borderColor: 'inherit',
+              borderRadius: 20,
+              borderWidth: 1,
+              formatter: '{value}%'
+            }
+          }
+        ]
+      };
+    };
+
+    // 创建初始数据
+    const createGaugeData = () => {
+      return [
+        {
+          value: +(Math.random() * 100).toFixed(2),
+          name: 'Perfect',
+          title: {
+            offsetCenter: ['0%', '-30%']
+          },
+          detail: {
+            valueAnimation: true,
+            offsetCenter: ['0%', '-20%'],
+            color: '#5470C6'
+          },
+          itemStyle: {
+            color: '#3A82FF'
+          }
+        },
+        {
+          value: +(Math.random() * 100).toFixed(2),
+          name: 'Good',
+          title: {
+            offsetCenter: ['0%', '0%']
+          },
+          detail: {
+            valueAnimation: true,
+            offsetCenter: ['0%', '10%'],
+            color: '#91CC75'
+          },
+          itemStyle: {
+            color: '#FFDD36'
+          }
+        },
+        {
+          value: +(Math.random() * 100).toFixed(2),
+          name: 'Commonly',
+          title: {
+            offsetCenter: ['0%', '30%']
+          },
+          detail: {
+            valueAnimation: true,
+            offsetCenter: ['0%', '40%'],
+            color: '#FAC858'
+          },
+          itemStyle: {
+            color: '#4EFF8F'
+          }
+        }
+      ];
+    };
+
+    // 每个仪表盘的独立数据
+    let gaugeData1 = createGaugeData();
+    let gaugeData2 = createGaugeData();
+    let gaugeData3 = createGaugeData();
+
+    // 应用配置到图表
+    chart1.setOption(createGaugeOption(gaugeData1));
+    chart2.setOption(createGaugeOption(gaugeData2));
+    chart3.setOption(createGaugeOption(gaugeData3));
+
+    // 设置独立的更新计时器
+
+    window.addEventListener('resize', () => {
+      chart1.resize();
+      chart2.resize();
+      chart3.resize();
+    });
+  </script>
+</body>
+
+</html>
