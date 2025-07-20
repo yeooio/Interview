@@ -193,7 +193,7 @@
       :disabled="interviewFinished ? !canGenerateReport : !isInterviewing"
       class="action-button"
     >
-      <img src="../assets/images/stop-icon.png" alt="Stop" />
+      <img v-if="!interviewFinished"  src="../assets/images/stop-icon.png" alt="Stop" />
       {{ stopButtonText }}
     </el-button>
   </div>
@@ -1255,6 +1255,7 @@ const getFillerStatusText = (filler: number) => {
 
 // 开始面试
 const startInterview = async () => {
+  isInterviewing.value=true
  nextTick(() => {
     startBarChartsAnimation();
   });

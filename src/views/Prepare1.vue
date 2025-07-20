@@ -169,7 +169,7 @@
     <template #footer>
       <span class="dialog-footer">
         <el-button type="primary" @click="navigateToGuide">查看备战指南</el-button>
-        <el-button @click="startInterview">直接开始面试</el-button>
+        <el-button @click="startInterview()">直接开始面试</el-button>
       </span>
     </template>
   </el-dialog>
@@ -215,6 +215,7 @@ const loading = ref(false); // 按钮加载状态
 // 开始面试请求
 const startInterview = async () => {
     showGuideDialog.value = false;
+     router.push('/interview')
   try {
     loading.value = true; // 显示加载状态
     
@@ -225,7 +226,7 @@ const startInterview = async () => {
       questionCount: parseInt(form.questionCount),
       language: form.language
     };
-    router.push('/interview')
+   
     // 发送开始面试请求
     const response = await service.post('/customer/interview/begin');
     console.log(response);
