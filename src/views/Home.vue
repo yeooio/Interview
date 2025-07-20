@@ -1,25 +1,88 @@
 <template>
   <div class="interview-page">
     <!-- 头部导航 -->
-    <div class="page-header">
-      <div class="header-left"></div>
-      <div class="header-nav">
-        <span class="nav-item" @click="navigateTo('home')">我的报告</span>
-        <span class="nav-item" @click="navigateTo('learning')">学习中心</span>
+    <div class="page-header" :class="{ 'fixed-header': isHeaderFixed }">
+      <div class="header-left">
+        <a href="#" class="logo">
+          <i class="fas fa-rocket logo-icon"></i>
+          <div class="logo-text">Career<span>Path</span></div>
+        </a>
+      </div>
 
-        <button @click="routerPlease()" >选择岗位</button>
-
-        <img src="../assets//images/avator.png" alt="" />
+     <div class="header-nav">
+      <div class="nav-items">
+        <router-link 
+          to="/" 
+          class="nav-item"
+          :class="{ active: $route.path === '/home' }"
+        >
+          首页
+        </router-link>
+        <router-link 
+          to="/choice" 
+          class="nav-item"
+          :class="{ active: $route.path === '/choice' }"
+        >
+          选择岗位
+        </router-link>
+        <div 
+          class="nav-item"
+          :class="{ active: $route.path === '/Prepare1' }"
+        
+        >
+          设备调试
+        </div>
+        <div 
+          class="nav-item"
+          :class="{ active: $route.path === '/guide' }"
+          
+        >
+          备战指南
+        </div>
+        <div 
+          class="nav-item"
+          :class="{ active: $route.path === '/Interview' }"
+          
+        >
+          面试实况
+        </div>
+        <div 
+          class="nav-item"
+          :class="{ active: $route.path === '/report' }"
+         
+        >
+          测试报告
+        </div>
+        <div 
+          class="nav-item"
+          :class="{ active: $route.path === '/path' }"
+        
+        >
+          提升路径
+        </div>
+        <div 
+          class="nav-item"
+          :class="{ active: $route.path === '/history' }"
+     
+        >
+          历史表现分析
+        </div>
       </div>
     </div>
 
+      <div class="header-right">
+        <button class="start-button2" @click="routerPlease()">
+          免费开始 <span>&nbsp;→</span>
+        </button>
+      </div>
+    </div>
     <!-- Banner 区域 -->
     <div class="banner-section">
       <!-- 左侧内容：标题+描述+步骤 -->
       <div class="banner-left">
         <!-- 标题区：支持多行/标签组合 -->
         <div class="banner-title">
-          <span class="tag">小绒燕ai面试</span>
+          <span class="tag">多模态智面优系统</span>
         </div>
         <div class="banner-title2">自动化智能面试工具</div>
         <!-- 描述文案 -->
@@ -122,8 +185,8 @@
                   class="header-bg"
                   :style="{ backgroundImage: `url(${item.image})` }"
                 >
-                  <h3 class="card-title">{{ item.title }}</h3>
-                  <div class="stars">{{ item.stars }}</div>
+                  <!-- <h3 class="card-title">{{ item.title }}</h3> -->
+                  <!-- <div class="stars">{{ item.stars }}</div> -->
                 </div>
               </div>
               <!-- 卡片内容区域 -->
@@ -178,8 +241,7 @@
           :key="index"
         >
           <div class="card-header analysis-header">
-          
-              <img :src="item.iconUrl" alt="图标" class="analysis-icon" />
+            <img :src="item.iconUrl" alt="图标" class="analysis-icon" />
             &nbsp;&nbsp;
             <h3 class="card-title">{{ item.title }}</h3>
           </div>
@@ -195,7 +257,13 @@
     </div>
 
     <!-- 面试痛点模块 -->
-    <div class="painpoint-section"></div>
+    <div class="painpoint-section">
+      <img
+        src="../assets/images/Component 16.png"
+        alt=""
+        class="special-image"
+      />
+    </div>
 
     <!-- 功能模块 -->
     <div class="feature-section">
@@ -227,7 +295,7 @@
       </div>
       <div class="feature-item">
         <div class="feature-icon">
-          <img src="../assets/images/酷.png" alt="" />
+          <img src="../assets/images/怕.png" alt="" />
         </div>
         <h3 class="feature-title">讯飞内容评估</h3>
         <div class="feature-desc">
@@ -253,8 +321,8 @@
         <!-- 信息区域 -->
         <div class="footer-info">
           <span>咨询时间: 工作日9点-11点 14点-17点</span>
-          <span></span>
-          <span></span>
+          <span>技术支持：CPP团队</span>
+          <span>2025盛燕AI面试·中国软件杯大赛参赛作品</span>
           <!-- <span></span> -->
           <span>邮编: 10046</span>
         </div>
@@ -264,16 +332,41 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, reactive } from 'vue';
+import { ref, onMounted, reactive, onUnmounted } from 'vue';
 import * as echarts from 'echarts';
-import maikIcon from "../assets/images/maik.png";
-import watchIcon from "..//assets/images/watch.png";
-import contentIcon from "..//assets/images/content.png";
-import Group1 from '../assets/images/Group 29.png'
-import Group2 from '../assets/images/Group 30.png'
-import Group3 from '../assets/images/Group 31.png'
+import maikIcon from '../assets/images/maik.png';
+import watchIcon from '..//assets/images/watch.png';
+import contentIcon from '..//assets/images/content.png';
+import Group1 from '../assets/images/Component 13.png';
+import Group2 from '../assets/images/Component 14.png';
+import Group3 from '../assets/images/Component 15.png';
+const isHeaderFixed = ref(false);
+import { useRoute } from 'vue-router'
 
+const route = useRoute()
+// 监听滚动事件的处理函数
+const handleScroll = () => {
+  // 获取当前滚动距离
+  const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+  // 当滚动距离超过200px时固定导航栏
+  console.log("sc",scrollTop);
+  
+  isHeaderFixed.value = scrollTop >= 200;
+  console.log(isHeaderFixed.value);
+  
+};
 
+// 生命周期钩子
+onMounted(() => {
+  initCharts();
+  // 添加滚动事件监听
+  window.addEventListener('scroll', handleScroll);
+});
+
+// 组件卸载时移除事件监听，避免内存泄漏
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll);
+});
 // 数据定义
 const state = reactive({
   bannerStats: ['精准分析', '智能评估', '多维度对比', '个性化建议'],
@@ -424,25 +517,50 @@ const initCharts = () => {
 // 生命周期钩子
 onMounted(() => {
   initCharts();
+  window.addEventListener('scroll', handleScroll);
 });
 
 // 方法定义
-const startInterview = () => {
-  // 开始面试逻辑
-  console.log('开始AI面试');
-};
+// const startInterview = () => {
+//   // 开始面试逻辑
+//   console.log('开始AI面试');
+// };
 
-const navigateTo = (path: string) => {
-  // 路由跳转逻辑
-  console.log(`导航到: ${path}`);
-};
+// const navigateTo = (path: string) => {
+//   // 路由跳转逻辑
+//   console.log(`导航到: ${path}`);
+// };
 
 import { useRouter } from 'vue-router';
-const router = useRouter()
-const routerPlease=()=>{
-router.push('/Choice');
-}
+const router = useRouter();
+const routerPlease = () => {
+  console.log(1);
+  
+  router.push('/Choice');
+};
 </script>
+<style lang="scss">
+/* 非scoped样式，确保全局生效 */
+.fixed-header {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  width: 100%; /* 确保导航栏宽度占满屏幕 */
+  z-index: 1000;
+  background-color: white;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+</style>
 
 <style lang="scss" scoped>
 :deep(.el-card__body) {
@@ -463,6 +581,172 @@ router.push('/Choice');
   //   'Helvetica Neue',
   //   sans-serif;
 }
+.fixed-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000; // 确保导航栏在其他内容上方
+  background-color: white; // 添加背景色，避免滚动时内容透过导航栏显示
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); // 可选：添加阴影增强视觉效果
+  animation: slideDown 0.3s ease; // 可选：添加滑入动画
+}
+
+// 可选：添加导航栏固定时的动画效果
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+.page-header {
+  display: flex;
+  align-items: center;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 100, 0.1);
+  padding: 0 25px;
+  height: 80px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.page-header:hover {
+  box-shadow: 0 10px 40px rgba(0, 80, 200, 0.15);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  margin-right: 40px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  font-weight: 700;
+  font-size: 24px;
+  color: #2563eb;
+  text-decoration: none;
+}
+
+.logo-icon {
+  margin-right: 12px;
+  font-size: 28px;
+  color: #3b82f6;
+}
+
+.logo-text {
+  position: relative;
+  top: -2px;
+}
+
+.logo-text span {
+  color: #0ea5e9;
+}
+
+.header-nav {
+  display: flex;
+  flex: 1;
+  height: 100%;
+  align-items: center;
+}
+
+.nav-items {
+  display: flex;
+  height: 100%;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  padding: 0 18px;
+  height: 100%;
+  font-weight: 600;
+  font-size: 16px;
+  color: #4b5563;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.nav-item:hover {
+  color: #2563eb;
+}
+
+.nav-item:hover::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 18px;
+  right: 18px;
+  height: 3px;
+  background: #3b82f6;
+  border-radius: 10px 10px 0 0;
+}
+
+.nav-item.active {
+  color: #00aeff;
+}
+
+.nav-item.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 18px;
+  right: 18px;
+  height: 3px;
+  background: #00aeff;
+  border-radius: 10px 10px 0 0;
+}
+
+.nav-item i {
+  margin-right: 8px;
+  font-size: 18px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  width: 150px !important;
+}
+
+.start-button2 {
+  // background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  background-color: #00aeff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  width: 220px !important;
+  border: none;
+  border-radius: 66px !important;
+  padding: 12px 20px 12px 28px;
+  font-weight: 550;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(67, 94, 136, 0.4);
+  display: flex;
+  align-items: center;
+}
+
+.start-button2:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(99, 110, 129, 0.6);
+}
+
+.start-button2:active {
+  transform: translateY(1px);
+}
+
+.start-button2 i {
+  margin-left: 8px;
+  font-size: 14px;
+}
+
 // 头部导航
 .page-header {
   width: 99vw;
@@ -485,6 +769,7 @@ router.push('/Choice');
   .header-nav {
     width: 495px;
     // background-color: antiquewhite;
+    margin-left: 68px;
     height: 100%;
     display: flex;
     justify-content: space-between;
@@ -584,13 +869,13 @@ router.push('/Choice');
   .tags {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: px;
     // margin-bottom: 20px;
   }
 
   .tag {
-    padding: 4px 8px;
-    background-color: #dbe3f6;
+    padding: 4px 10px !important;
+    background-color: #e4ecff !important;
     color: #316ffd;
     border-radius: 10px;
     font-size: 10px;
@@ -604,7 +889,7 @@ router.push('/Choice');
 .painpoint-section {
   width: 99vw;
   height: 502px;
-  background-color:pink;
+  background-color: pink;
 }
 .feature-section {
   width: 99vw;
@@ -613,7 +898,7 @@ router.push('/Choice');
 }
 .page-footer {
   width: 99vw;
-  height: 341px;
+  height: 241px;
   background-color: #393939;
 }
 
@@ -683,25 +968,28 @@ router.push('/Choice');
   width: 400px;
   height: 200px;
   // font-weight: bold;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   overflow: hidden;
   .card-value {
     box-sizing: content-box;
     // padding-top: 20px;
-    color: #00aeff;
-    font-size: 48px;
+    color: #00a0ea;
+    font-size: 40px;
     width: 150px;
-    font-weight: bold;
+    // font-weight: bold;
     padding-top: 40px;
   }
   .card-desc {
-    color: #716e75;
-    font-size: 24px !important;
+    color: #6b6870;
+    font-size: 20px !important;
     margin: 5px 0 5px 0;
     font-weight: bold;
   }
   .card-tag {
     color: #1a1a1c;
-    font-size: 24px;
+    font-size: 20px;
     // font-weight: bold;
     margin: 0;
   }
@@ -762,7 +1050,7 @@ router.push('/Choice');
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  // justify-content: center;
   background-color: #f5f5f5; /* 可根据实际需求调整背景色 */
   .card-header {
     width: 100%;
@@ -786,9 +1074,9 @@ router.push('/Choice');
 }
 
 .scene-choice {
-  font-size: 28px;
-  width: 100%;
-  font-weight: bold;
+  font-size: 32px;
+  // width: 100%;
+  // font-weight: bold;
   text-align: center;
   margin-bottom: 15px;
   box-sizing: border-box;
@@ -868,7 +1156,7 @@ router.push('/Choice');
   height: 80px;
   box-sizing: border-box;
   padding-left: 20px;
-  background-color: #f2f3f5;
+  background-color: #f6f9ff;
   border-radius: 4%;
   display: flex;
   // fl;
@@ -887,20 +1175,29 @@ router.push('/Choice');
       color: #1a1a1c;
     }
     .item-count {
-      color: #316ffd;
+      color: #b0afb7;
       font-size: 10px;
     }
   }
 }
 .start-button {
   width: 312px;
-  height: 28px;
+  height: 32px;
+  border-radius: 4px;
   background-color: #00aeff;
+}
+.special-image {
+  width: 100%;
 }
 
 .analysis-section {
+  padding-top: 20px;
   width: 100%;
-  padding: 40px 20px; /* 上下内边距 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  // justify-content: center;
+  // padding: 40px 20px; /* 上下内边距 */
   background: #fff; /* 白色背景 */
   box-sizing: border-box;
   .section-title {
@@ -908,7 +1205,7 @@ router.push('/Choice');
     font-weight: 600; /* 适中加粗 */
     color: #333; /* 深灰色文字 */
     text-align: center;
-    margin-bottom: 32px; /* 标题与卡片间距 */
+    // margin-bottom: 32px; /* 标题与卡片间距 */
   }
 
   /* 卡片容器：Flex 布局 */
@@ -921,11 +1218,12 @@ router.push('/Choice');
 
   /* 单个卡片样式 */
   .analysis-card {
-    width: 400px; /* 卡片宽度 */
+    margin-top: 20px;
+    width: 380px; /* 卡片宽度 */
     height: 200px; /* 最小高度 */
-    background: #f7f6f9; /* 浅灰色背景 */
+    background: #f4f7ff; /* 浅灰色背景 */
     border-radius: 8px; /* 卡片圆角 */
-    padding: 24px; /* 内边距 */
+    padding: 20px; /* 内边距 */
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
@@ -983,12 +1281,14 @@ router.push('/Choice');
 .footer-nav {
   width: 460px;
   font-size: 24px;
+  padding-top: 40px;
   display: flex;
   justify-content: space-between;
 }
 .footer-info {
+  color: #b5b5b5;
   box-sizing: border-box;
-  padding-top: 50px;
+  padding-top: 40px;
   font-size: 16px;
   display: flex;
   // justify-content:;
@@ -1001,16 +1301,18 @@ router.push('/Choice');
   box-sizing: border-box;
   padding: 0 130px;
   .feature-title {
-    font-size: 24px;
-    color: #00aeff;
+    font-size: 20px;
+    color: #028bf4;
     margin: 0 0 5px 0;
   }
   .feature-desc {
     color: #1a1a1c;
+    font-size: 14px;
   }
   .last {
-    color: #716e75;
+    color: #b0afb7;
     font-size: 12px;
+    margin-top: 20px;
   }
   .know {
     color: #716e75;
@@ -1021,55 +1323,54 @@ router.push('/Choice');
     justify-content: flex-end;
   }
 }
-.card-header{
+.card-header {
   display: inline-flex !important;
   // justify-content: space-around;
   align-items: center;
   // vertical-align: ;
-  img{
+  img {
     height: 24px;
     margin-bottom: -2px;
   }
-  .card-title{
+  .card-title {
     // font-size: 24px;
     font-size: 20px;
   }
 }
-.analysis-list{
+.analysis-list {
   list-style: none;
   display: flex;
   flex-direction: column;
   gap: 4px;
-  
+  align-items: flex-start;
+  margin-left: -90px;
 }
-.analysis-list li::before{
-  content: "•";
-  color: #00AEFF;
+.analysis-list li::before {
+  content: '•';
+  color: #00aeff;
   padding-right: 10px;
   box-sizing: border-box;
 }
-li::marker{
-  color: #00AEFF!important;
+li::marker {
+  color: #00aeff !important;
 }
-li{
+li {
   display: flex;
   justify-content: flex-start;
   font-size: 16px;
   // font-weight: bold;
-
-  
 }
 .card-body.analysis-body {
-    margin-top: -20px;
+  margin-top: -20px;
 }
 .analysis-cards {
   /* 父容器样式... */
-  
+
   /* 选第三个 .scene-card.analysis-card */
-  .scene-card.analysis-card:nth-child(3) .analysis-list{
+  .scene-card.analysis-card:nth-child(3) .analysis-list {
     /* 你的自定义样式，比如边框、背景色 */
     padding: 0;
-    // border: 2px solid #00AEFF; 
+    // border: 2px solid #00AEFF;
     // background: #F9FCFF;
   }
 }

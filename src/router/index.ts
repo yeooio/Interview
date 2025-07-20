@@ -8,6 +8,8 @@ const Home = () => import('../views/Home.vue');
 const Prepare1 =()=>import('../views/Prepare1.vue')
 const Interview =()=>import('../views/Interview.vue')
 const Choice = ()=>import('../views/Choice.vue')
+// const Compare = ()=>import('../views/Compare.vue')
+// const Guide = ()=>import('../views/Guide.vue')
 
 
 const routes: Array<RouteRecordRaw> = [
@@ -16,6 +18,7 @@ const routes: Array<RouteRecordRaw> = [
         name: 'Login',
         component: Login
     },
+   
     {
         path: '/home',
         name: 'Home',

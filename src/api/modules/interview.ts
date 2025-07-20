@@ -7,16 +7,16 @@ import type {
 } from '../types';
 
 // 人脸分析接口
-export const msrFace = async ({ sid, file }) => {
-  const formData = new FormData();
-  formData.append('file', file); // 文件必须放入 FormData
-  return axios.post('/customer/interview/msrFace', formData, {
-    params: { sid }, // sid 作为查询参数，自动拼接在 URL 后
-    headers: {
-      // 无需手动设置，axios 会自动添加 multipart/form-data 头
-    },
-  });
-};
+// export const msrFace = async ({ sid:, file }) => {
+//   const formData = new FormData();
+//   formData.append('file', file); // 文件必须放入 FormData
+//   return axios.post('/customer/interview/msrFace', formData, {
+//     params: { sid }, // sid 作为查询参数，自动拼接在 URL 后
+//     headers: {
+//       // 无需手动设置，axios 会自动添加 multipart/form-data 头
+//     },
+//   });
+// };
 
 // 语音分析接口
 export const msrVoice = (data: {

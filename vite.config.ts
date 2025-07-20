@@ -25,4 +25,8 @@ export default defineConfig({
       ],
     },
   },
+  define: {
+    __VUE_PROD_DEVTOOLS__: false, // 禁用 devtools 生产环境
+    __VUE_OPTIONS_API__: true, // 启用 Options API
+  },
 });

@@ -1,25 +1,31 @@
 {
+  "extends": "@vue/tsconfig/tsconfig.node.json",
   "compilerOptions": {
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
+    // 引用项目必备设置
+    "composite": true,
+    "moduleResolution": "bundler",
+    "moduleDetection": "force",
+    
+    // 与allowImportingTsExtensions兼容的设置
+    "emitDeclarationOnly": true,
+    
+    // 基础编译设置
     "target": "ES2022",
     "lib": ["ES2023"],
     "module": "ESNext",
     "skipLibCheck": true,
-
-    /* Bundler mode */
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
-    "moduleDetection": "force",
-    "noEmit": true,
-
-    /* Linting */
+    "allowImportingTsExtensions": true,
+    
+    // 类型检查
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+    "allowSyntheticDefaultImports": true
   },
   "include": ["vite.config.ts"]
 }

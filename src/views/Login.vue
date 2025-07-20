@@ -26,27 +26,9 @@
             style="width: 100%"
           />
         </el-form-item>
-        <div class="line"></div>
-        <el-form-item>
-          <el-input
-            v-model="loginForm.verificationCode"
-            placeholder="请输入验证码"
-            style="width: 100%"
-          >
-          <div class="append"></div>
-            <template #append>
-             <img src="" alt="">
-              <el-button
-                type="text"
-                @click="refreshVerificationCode"
-                icon="Refresh"
-              ></el-button> 
-            </template>
-           
-          </el-input>
-        </el-form-item>
+        
         <div class="line moverLine"></div>
-        <el-form-item class="form-remember" prop="rememberPassword">
+        <el-form-item class="form-remember el-form-item__content" prop="rememberPassword">
           <el-checkbox v-model="loginForm.rememberPassword"
             >记住密码</el-checkbox
           >
@@ -55,8 +37,9 @@
         <el-form-item>
           <el-button
             type="primary"
-            @click.prevent="handleLogin"
-            style="width: 100%"
+            class="login-btn"
+            :loading="loading"
+            @click="handleLogin"
           >
             登 录
           </el-button>
@@ -71,7 +54,7 @@
 import { ref } from 'vue';
 import { ElMessage } from 'element-plus';
 import router from '../router';
-
+const loading = ref(false);
 // 登录表单数据
 const loginForm = ref({
   username: '',
@@ -90,15 +73,26 @@ const refreshVerificationCode = () => {
 };
 
 // 模拟登录逻辑（实际需调用后端接口）
-const handleLogin = () => {
+const handleLogin =async () => {
   if (
     loginForm.value.username &&
     loginForm.value.password 
     // loginForm.value.verificationCode === verificationCodeValue.value
   ) {
-    ElMessage.success('登录成功！');
-    console.log('登录成功！', loginForm.value);
-    router.push('/home'); 
+    loading.value = true;
+    
+    // 表单验证
+    // const valid = await loginFormRef.value.validate();
+    // if (!valid) return;
+    
+    // 模拟API请求
+    // await new Promise(resolve => setTimeout(resolve, 100));
+    
+    ElMessage.success('登录成功');
+    setTimeout(() => {
+      router.push('/home');
+       ElMessage.success('登录成功');
+    }, 800);
     // 这里可以添加实际登录成功后的逻辑，比如跳转页面等
   } else {
     ElMessage.error('登录失败，请检查输入信息');
@@ -152,11 +146,11 @@ margin: 0px 0PX 31px 10px ;
   // padding: 20px;
   // padding: 0px 41px 0px 59px;
   box-sizing: content-box;
-  padding: 0px 45px;
+  padding: 0px 40px;
   // 上右下左逆时针，两个的话，第一个上下，第二个左右
   // background: rgba(255, 255, 255, 0.8); /* 半透明效果 */
   border-radius: 17px;
-  height: 399px;
+  height: 360px;
   background: white;
   position: absolute;
   left: 780px;
@@ -210,15 +204,13 @@ h2{
   box-shadow: none !important; /* 同时去掉可能的阴影（如果有） */
 }
 
-.el-form-item__content{
-  display: flex;
-  justify-content: space-between !important;
-}
+
 .el-button--primary{
   --el-button-bg-color: #0E70FC;
-  width: 300px;
-  height: 30px;
+  width: 320px;
+  height: 35px;
   border-radius: 8px;
+  margin-top: 10px;
 }
 .el-checkbox{
   --el-checkbox-font-size: 12px;
@@ -228,5 +220,23 @@ h2{
 }
 .el-input{
   font-size: 12px;
+}
+.el-form-item__content{
+  display: flex;
+  justify-content: space-between !important;
+  
+}
+.form-remember{
+  display: flex;
+  justify-content: space-between !important;
+  
+}
+.el-form-item__content{
+  display: flex;
+  justify-content: space-between;
+}
+.register-link{
+  // margin-right: 200px !important;
+  margin-left: 200px;
 }
 </style>

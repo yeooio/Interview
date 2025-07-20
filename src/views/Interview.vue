@@ -1,4 +1,19 @@
 <template>
+  <div v-if="generatingReport" class="report-loading-overlay">
+  <div class="loading-content">
+    <div class="spinner">
+      <div class="bounce1"></div>
+      <div class="bounce2"></div>
+      <div class="bounce3"></div>
+    </div>
+    <h3>正在生成模拟报告...</h3>
+    <p>请稍候，系统正在分析您的面试表现并生成详细报告</p>
+    <div class="progress">
+      <div class="progress-bar" :style="{ width: progress + '%' }"></div>
+    </div>
+    <p class="countdown">页面将在 {{ countdown2 }} 秒后自动跳转</p>
+  </div>
+</div>
   <div class="interview">
     <div v-if="showPermissionPopup || !mediaStream" class="permission-popup">
       <div class="popup-content">
@@ -45,10 +60,77 @@
         </div>
       </div>
     </div>
-    <div class="page-header">
-      <div class="header-left"></div>
-      <div class="header-nav">
-        <img src="../assets//images/avator.png" alt="User Avatar" />
+   <div class="page-header">
+      <div class="header-left">
+        <a href="#" class="logo">
+         <img src="../assets/images/logo.png" alt="">
+        </a>
+      </div>
+
+     <div class="header-nav">
+      <div class="nav-items">
+        <router-link 
+          to="/" 
+          class="nav-item"
+          :class="{ active: $route.path === '/home' }"
+        >
+          首页
+        </router-link>
+        <router-link 
+          to="/choice" 
+          class="nav-item"
+          :class="{ active: $route.path === '/choice' }"
+        >
+          选择岗位
+        </router-link>
+        <div 
+          class="nav-item"
+          :class="{ active: $route.path === '/Prepare1' }"
+        
+        >
+          设备调试
+        </div>
+        <div 
+          class="nav-item"
+          :class="{ active: $route.path === '/guide' }"
+          
+        >
+          备战指南
+        </div>
+        <div 
+          class="nav-item"
+          :class="{ active: $route.path === '/interview' }"
+          
+        >
+          面试实况
+        </div>
+        <div 
+          class="nav-item"
+          :class="{ active: $route.path === '/report' }"
+         
+        >
+          测试报告
+        </div>
+        <div 
+          class="nav-item"
+          :class="{ active: $route.path === '/path' }"
+        
+        >
+          提升路径
+        </div>
+        <div 
+          class="nav-item"
+          :class="{ active: $route.path === '/history' }"
+     
+        >
+          历史表现分析
+        </div>
+      </div>
+    </div>
+      <div class="header-right">
+        <button class="start-button2" >
+          免费开始 <span>&nbsp;→</span>
+        </button>
       </div>
     </div>
 
@@ -95,26 +177,26 @@
             </div>
           </div>
 
-          <div class="button-group">
-            <el-button
-              type="primary"
-              @click="startInterview"
-              :disabled="isInterviewing"
-              class="action-button"
-            >
-              <img src="../assets/images/start-icon.png" alt="Start" />开始回答
-            </el-button>
+           <div class="button-group">
+    <el-button
+      type="primary"
+      @click="startInterview"
+      :disabled="isInterviewing"
+      class="action-button"
+    >
+      <img src="../assets/images/start-icon.png" alt="Start" />开始回答
+    </el-button>
 
-            <el-button
-              type="danger"
-              @click="stopCount < 2 ? stopInterview() : generateReport()"
-              :disabled="!isInterviewing"
-              class="action-button"
-            >
-              <img src="../assets/images/stop-icon.png" alt="Stop" />
-              {{ stopButtonText }}
-            </el-button>
-          </div>
+    <el-button
+      :type="interviewFinished ? 'primary' : 'danger'"
+      @click="interviewFinished ? generateReport() : stopInterview()"
+      :disabled="interviewFinished ? !canGenerateReport : !isInterviewing"
+      class="action-button"
+    >
+      <img src="../assets/images/stop-icon.png" alt="Stop" />
+      {{ stopButtonText }}
+    </el-button>
+  </div>
         </div>
         <div class="circle">
           <DIV class="IMFO">
@@ -147,7 +229,7 @@
                   <div class="card">
                     <div class="card1">
                       <span class="fluer">平均语速</span>
-                      <span class="number">{{ avgSpeed }}字/分</span>
+                      <span class="number">{{ Math.round(avgSpeed)  }}字/分</span>
                       <span
                         class="notice"
                         :data-status="
@@ -162,7 +244,7 @@
                     </div>
                     <div class="card2">
                       <span class="fluer">语气词频率</span>
-                      <span class="number">{{ fillerFreq }}次/分</span>
+                      <span class="number">{{  Math.round(fillerFreq)  }}次/分</span>
                       <span
                         class="notice"
                         :data-status="
@@ -197,14 +279,14 @@
                   <div class="card">
                     <div class="card1">
                       <span class="fluer">眼神交流</span>
-                      <span class="number">{{ eyeContact }}</span>
+                      <span class="number">{{ Math.round(eyeContact) }}%</span>
                       <span class="notice">{{
                         getEyeContactStatus(eyeContact)
                       }}</span>
                     </div>
                     <div class="card2">
-                      <span class="fluer">手势自然度</span>
-                      <span class="number">{{ gestureNature }}</span>
+                      <span class="fluer">手势自然度 </span>
+                      <span class="number">{{ Math.round(gestureNature) }}%</span>
                       <span
                         class="notice"
                         :data-status="
@@ -242,14 +324,14 @@
                   <div class="card">
                     <div class="card1">
                       <span class="fluer">STAR结构应用</span>
-                      <span class="number">{{ starApplication }}</span>
+                      <span class="number">{{ Math.round(starApplication) }}%</span>
                       <span class="notice">{{
                         getStarStatus(starApplication)
                       }}</span>
                     </div>
                     <div class="card2">
                       <span class="fluer">问题理解度</span>
-                      <span class="number">{{ problemComprehension }}</span>
+                      <span class="number">{{ Math.round(problemComprehension) }}%</span>
                       <span class="notice">{{
                         getComprehendStatus(problemComprehension)
                       }}</span>
@@ -260,12 +342,19 @@
                 </div>
               </div>
             </div>
-            <div class="key-word">
-              <div class="key">
-                <img src="../assets/images/Component 2.png" alt="" />
-              </div>
-              <div class="box"></div>
-            </div>
+          <div class="key-word">
+    <div class="key">
+      <img src="../assets/images/Component 2.png" alt="" />
+    </div>
+    <div class="bar-charts-container">
+      <div class="bar-chart-box">
+        <div ref="barChart1" class="bar-chart"></div>
+      </div>
+      <div class="bar-chart-box">
+        <div ref="barChart2" class="bar-chart"></div>
+      </div>
+    </div>
+  </div>
           </div>
         </div>
       </div>
@@ -274,31 +363,380 @@
 </template>
 
 <script setup lang="ts">
+// import { useRoute } from 'vue-router'
+
+
+
+
+
+
+const avgSpeed = ref(0); 
+const fillerFreq = ref(0); 
+const eyeContact = ref(0); 
+const gestureNature = ref(0); 
+const starApplication = ref(0); 
+const problemComprehension = ref(0);
+
+// 新增定时器
+let metricsTimer: number | null = null;
+let declineTimer: number | null = null;
+
+// 初始化指标值
+const initMetrics = () => {
+  avgSpeed.value = 98;
+  fillerFreq.value = 5;
+  eyeContact.value = 62;
+  gestureNature.value = 75;
+  starApplication.value = 65;
+  problemComprehension.value = 78;
+};
+
+// 开始动态变化
+const startMetricsAnimation = () => {
+  // 清除可能存在的旧定时器
+  if (metricsTimer) clearInterval(metricsTimer);
+  if (declineTimer) clearInterval(declineTimer);
+  
+  // 初始化指标值
+  initMetrics();
+  
+  // 启动随机变化定时器
+  metricsTimer = setInterval(() => {
+    // 随机波动 - 在合理范围内变化
+    avgSpeed.value = Math.max(58, Math.min(220, avgSpeed.value + getRandomChange(-5, 5)));
+    fillerFreq.value = Math.max(0, Math.min(8, fillerFreq.value + getRandomChange(-0.5, 0.5)));
+    eyeContact.value = Math.max(22, Math.min(95, eyeContact.value + getRandomChange(-3, 3)));
+    gestureNature.value = Math.max(18, Math.min(95, gestureNature.value + getRandomChange(-20 ,20)));
+    starApplication.value = Math.max(25, Math.min(95, starApplication.value + getRandomChange(-3, 3)));
+    problemComprehension.value = Math.max(45, Math.min(95, problemComprehension.value + getRandomChange(-3, 3)));
+  }, 2000) as unknown as number;
+};
+
+// 停止后指标递减
+const startMetricsDecline = () => {
+  // 清除变化定时器
+  if (metricsTimer) {
+    clearInterval(metricsTimer);
+    metricsTimer = null;
+  }
+  
+  // 启动递减定时器
+  declineTimer = setInterval(() => {
+    // 所有指标逐渐变差
+    avgSpeed.value = Math.max(20, avgSpeed.value - getRandomChange(1, 3));
+    fillerFreq.value = Math.min(10, fillerFreq.value + getRandomChange(0.2, 0.5));
+    eyeContact.value = Math.max(30, eyeContact.value - getRandomChange(1, 3));
+    gestureNature.value = Math.max(40, gestureNature.value - getRandomChange(1, 3));
+    starApplication.value = Math.max(30, starApplication.value - getRandomChange(1, 3));
+    problemComprehension.value = Math.max(40, problemComprehension.value - getRandomChange(1, 3));
+    
+    // 当指标下降到一定程度时停止递减
+    if (avgSpeed.value <= 100 && fillerFreq.value >= 8) {
+      if (declineTimer) {
+        clearInterval(declineTimer);
+        declineTimer = null;
+      }
+    }
+  }, 1500) as unknown as number;
+};
+
+// 获取随机变化值
+const getRandomChange = (min: number, max: number) => {
+  return Math.random() * (max - min) + min;
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// 柱形图
+import { nextTick } from 'vue';
+
+// 柱形图相关变量
+const barChart1 = ref<HTMLElement | null>(null);
+const barChart2 = ref<HTMLElement | null>(null);
+let barChartInstance1: echarts.ECharts | null = null;
+let barChartInstance2: echarts.ECharts | null = null;
+
+// 柱形图数据
+const barData1 = ref([85, 92, 78]); // 专业知识水平、技能匹配度、表达语言能力
+const barData2 = ref([90, 82, 88]); // 逻辑思维能力、创新能力、应变抗压能力
+
+// 初始化柱形图
+const initBarCharts = () => {
+  if (!barChart1.value || !barChart2.value) return;
+  
+  // 销毁旧的图表实例
+  if (barChartInstance1) barChartInstance1.dispose();
+  if (barChartInstance2) barChartInstance2.dispose();
+  
+  // 创建新的图表实例
+  barChartInstance1 = echarts.init(barChart1.value);
+  barChartInstance2 = echarts.init(barChart2.value);
+  
+  // 第一个柱形图配置
+  const option1 = {
+    tooltip: {
+      trigger: 'axis',
+      axisPointer: {
+        type: 'shadow'
+      }
+    },
+    grid: {
+      left: '3%',
+      right: '4%',
+      bottom: '3%',
+      top: '10%',
+      containLabel: true
+    },
+    xAxis: {
+      type: 'category',
+      data: ['专业知识', '技能匹配', '表达能力'],
+      axisLabel: {
+        color: '#666',
+        fontSize: 10
+      },
+      axisLine: {
+        show: false
+      },
+      axisTick: {
+        show: false
+      }
+    },
+    yAxis: {
+      type: 'value',
+      min: 0,
+      max: 100,
+      axisLabel: {
+        color: '#666',
+        fontSize: 10
+      },
+      splitLine: {
+        lineStyle: {
+          color: '#eee',
+          type: 'dashed'
+        }
+      }
+    },
+    series: [{
+      name: '能力值',
+      type: 'bar',
+      barWidth: '40%',
+      data: barData1.value,
+      itemStyle: {
+        color: (params: any) => {
+          const colors = ['#3A82FF', '#FFDD36', '#4EFF8F'];
+          return colors[params.dataIndex];
+        }
+      },
+      label: {
+        show: true,
+        position: 'top',
+        color: '#333',
+        fontSize: 10
+      }
+    }]
+  };
+  
+  // 第二个柱形图配置
+  const option2 = {
+    tooltip: {
+      trigger: 'axis',
+      axisPointer: {
+        type: 'shadow'
+      }
+    },
+    grid: {
+      left: '3%',
+      right: '4%',
+      bottom: '3%',
+      top: '10%',
+      containLabel: true
+    },
+    xAxis: {
+      type: 'category',
+      data: ['逻辑思维', '创新能力', '应变能力'],
+      axisLabel: {
+        color: '#666',
+        fontSize: 10
+      },
+      axisLine: {
+        show: false
+      },
+      axisTick: {
+        show: false
+      }
+    },
+    yAxis: {
+      type: 'value',
+      min: 0,
+      max: 100,
+      axisLabel: {
+        color: '#666',
+        fontSize: 10
+      },
+      splitLine: {
+        lineStyle: {
+          color: '#eee',
+          type: 'dashed'
+        }
+      }
+    },
+    series: [{
+      name: '能力值',
+      type: 'bar',
+      barWidth: '40%',
+      data: barData2.value,
+      itemStyle: {
+        color: (params: any) => {
+          const colors = ['#FF6B6B', '#FFA36C', '#6B5B95'];
+          return colors[params.dataIndex];
+        }
+      },
+      label: {
+        show: true,
+        position: 'top',
+        color: '#333',
+        fontSize: 10
+      }
+    }]
+  };
+  
+  barChartInstance1.setOption(option1);
+  barChartInstance2.setOption(option2);
+  
+  // 立即渲染
+  barChartInstance1.resize();
+  barChartInstance2.resize();
+};
+
+// 更新柱形图数据（随机变化）
+const updateBarCharts = () => {
+  if (!barChartInstance1 || !barChartInstance2) return;
+  
+  // 随机更新数据
+  barData1.value = barData1.value.map(val => 
+    Math.max(60, Math.min(100, val + Math.random() * 10 - 5))
+  );
+  
+  barData2.value = barData2.value.map(val => 
+    Math.max(60, Math.min(100, val + Math.random() * 10 - 5))
+  );
+  
+  // 应用新数据
+  barChartInstance1.setOption({
+    series: [{
+      data: barData1.value
+    }]
+  });
+  
+  barChartInstance2.setOption({
+    series: [{
+      data: barData2.value
+    }]
+  });
+};
+
+// 递减柱形图数据
+const declineBarCharts = () => {
+  if (!barChartInstance1 || !barChartInstance2) return;
+  
+  barData1.value = barData1.value.map(val => 
+    Math.max(0, val - 10)
+  );
+  
+  barData2.value = barData2.value.map(val => 
+    Math.max(0, val - 10)
+  );
+  
+  barChartInstance1.setOption({
+    series: [{
+      data: barData1.value
+    }]
+  });
+  
+  barChartInstance2.setOption({
+    series: [{
+      data: barData2.value
+    }]
+  });
+};
+
+// 启动柱形图动画
+let barChartTimer: number | null = null;
+const startBarChartsAnimation = () => {
+  if (barChartTimer) clearInterval(barChartTimer);
+  barChartTimer = setInterval(updateBarCharts, 2000) as unknown as number;
+};
+
+// 停止柱形图动画并递减
+const stopBarChartsAnimation = () => {
+  if (barChartTimer) {
+    clearInterval(barChartTimer);
+    barChartTimer = null;
+  }
+  
+  const declineTimer = setInterval(() => {
+    declineBarCharts();
+    
+    // 当所有值都接近0时停止
+    if (barData1.value.every(val => val <= 10) && 
+        barData2.value.every(val => val <= 10)) {
+      clearInterval(declineTimer);
+    }
+  }, 200) as unknown as number;
+};
+
+
+
+
+
+
+
+
+
+
+const generatingReport = ref(false);
+const progress = ref(0);
+const countdown2 = ref(5);
+// const totalQuestions = 5; // 总共5个问题
+
+// const route = useRoute()
 const stopCount = ref(0);
 const questionSources = ref([
-  { text: '2024年字节真题', color: 'danger' }, // 红色
-  { text: '2023年腾讯真题', color: 'warning' }, // 黄色
-  { text: '2025年阿里真题', color: 'success' }  // 绿色
+  { text: '2024年字节题库', color: 'danger' }, // 红色
+  { text: '2023年腾讯题库', color: 'danger' }, // 红色
+  { text: '2025年阿里题库', color: 'danger' }, // 红色
+  { text: '2024年网易题库', color: 'danger' }, // 红色
+  { text: '2025年滴滴题库', color: 'danger' }, // 红色
+  // { text: '2023年腾讯真题', color: 'warning' }, // 黄色
+  // { text: '2025年阿里真题', color: 'success' }  // 绿色
 ]);
 const currentSourceIndex = ref(0);
 
 // 只需要这6个变量
-const avgSpeed = ref(0); // 平均语速（voice.frame.speed）
-const fillerFreq = ref(0); // 语气词频率（voice.frame.filler）
-const eyeContact = ref('0%'); // 眼神交流（face.frame.eye）
-const gestureNature = ref('无'); // 手势自然度（face.frame.nature）
-const starApplication = ref('0%'); // STAR结构应用（word.frame.star）
-const problemComprehension = ref('0%'); // 问题理解度（word.frame.comprehend）
 
 import { ref, onMounted, onBeforeUnmount, computed } from 'vue';
 import * as echarts from 'echarts';
-import { msrFace, msrVoice } from '../api/modules/interview';
+// import { msrFace, msrVoice } from '../api/modules/interview';
 import type { FaceAnalysisResponse, VoiceAnalysisResponse } from '../api/types';
 import service from '@/api/request';
 
 // 定时器和倒计时相关
 const countdown = ref(45);
-const countdownInterval = ref<number | null>(null);
+const countdownInterval = ref<number | null>(null); 
 const formattedTime = ref('00:00');
 
 // 临时存储面试问题和建议
@@ -324,15 +762,8 @@ const voiceScores = ref<number[]>([]);
 const timestamps = ref<string[]>([]);
 
 // 面试内容
-const currentQuestion = ref(
-  '请描述一次你解决复杂技术问题的经历，重点说明你的思考过程和解决方案'
-);
-const adviceTips = ref([
-  '从问题背景入手，说明问题的复杂性和挑战',
-  '详细描述你的解决思路和技术选型原因',
-  '说明最终方案的效果和你从中学到了什么',
-]);
 
+const canGenerateReport = ref(false);
 // 定时器和WebSocket
 let audioInterval: number | null = null;
 let videoInterval: number | null = null;
@@ -360,6 +791,43 @@ const voiceData = ref({
   speed: 180,
   filler: 3,
 });
+const fixedQuestions = [
+  'Spring Boot的核心优势是什么？',
+  '如何优化Java应用内存使用？',
+  'RESTful API设计的关键原则？',
+  '如何处理数据库事务并发问题？',
+  'Java多线程同步常用机制？'
+];
+
+const fixedAdvice = [
+  ['自动配置简化开发', '内嵌容器便于部署', '丰富的Starter库'],
+  ['使用对象池减少创建', '优化数据结构选择', '及时释放无用引用'],
+  ['资源URI使用名词', 'HTTP方法表达操作', '无状态通信设计'],
+  ['合理设置事务隔离级别', '使用乐观锁机制', '避免长事务'],
+  ['synchronized关键字', 'ReentrantLock可重入锁', 'Semaphore信号量']
+];
+const totalQuestions = 5; // 总共5个问题
+const currentQuestionIndex = ref(0); // 当前问题索引
+const interviewFinished = ref(false); // 面试是否完成
+
+
+// const currentQuestionIndex = ref(0);
+
+// 面试内容
+const currentQuestion = ref(fixedQuestions[0]);
+const adviceTips = ref(fixedAdvice[0]);
+
+
+
+
+
+
+
+
+
+
+
+
 
 // 计算整体得分（三个指标的平均值）
 const overallScore = computed(() => {
@@ -774,6 +1242,18 @@ const getFillerStatusText = (filler: number) => {
 
 // 开始面试
 const startInterview = async () => {
+ nextTick(() => {
+    startBarChartsAnimation();
+  });
+   if (interviewFinished.value) {
+    canGenerateReport.value = true;
+    return;
+  }
+    // isInterviewing.value=true
+    setTimeout(()=>{
+  startMetricsAnimation();
+    },2000)
+
   startGaugesAnimation();
   try {
     console.log('开始面试流程...');
@@ -797,7 +1277,7 @@ const startInterview = async () => {
       if (countdown.value <= 0) {
         stopInterview();
       }
-    }, 1000);
+    }, 1000) as unknown as number;
 
     if (!mediaStream.value) {
       try {
@@ -852,13 +1332,13 @@ const startInterview = async () => {
       const videoBlob = await getVideoFrame();
 
       // 添加固定 requestId: '8'
-      const faceResponse = await msrFace({
-        sid: '123',
-        requestId: '8', // 添加固定requestId
-        file: videoBlob,
-      });
+      // const faceResponse = await msrFace({
+      //   sid: '123',
+      //   // requestId: '8', // 添加固定requestId
+      //   file: videoBlob,
+      // });
 
-      console.log('第一帧视频发送成功:', faceResponse);
+      // console.log('第一帧视频发送成功:', faceResponse);
     } catch (error: any) {
       console.error('第一帧视频发送失败:', error);
       if (error?.response?.status === 401) {
@@ -885,14 +1365,14 @@ const startInterview = async () => {
         audioData.value = [];
 
         // 添加固定 requestId: '8'
-        const voiceResponse = await msrVoice({
-          sid: '234',
-          recordId: '8',
-          requestId: '8', // 添加固定requestId
-          file: wavBlob,
-        });
+        // const voiceResponse = await msrVoice({
+        //   sid: '234',
+        //   recordId: '8',
+        //   // requestId: '8', // 添加固定requestId
+        //   file: wavBlob,
+        // });
 
-        console.log('第一段语音发送成功:', voiceResponse);
+        // console.log('第一段语音发送成功:', voiceResponse);
       } catch (error: any) {
         console.error('第一段语音发送失败:', error);
         if (error?.response?.status === 401) {
@@ -902,63 +1382,63 @@ const startInterview = async () => {
     }
 
     // 3. 设置视频帧定时发送
-    videoInterval = setInterval(async () => {
-      try {
-        const videoBlob = await getVideoFrame();
+    // videoInterval = setInterval(async () => {
+    //   try {
+    //     const videoBlob = await getVideoFrame();
 
-        // 添加固定 requestId: '8'
-        const faceResponse = await msrFace({
-          sid: '123',
-          requestId: '8', // 添加固定requestId
-          file: videoBlob,
-        });
+    //     // 添加固定 requestId: '8'
+    //     const faceResponse = await msrFace({
+    //       sid: '123',
+    //       // requestId: '8', // 添加固定requestId
+    //       file: videoBlob,
+    //     });
 
-        console.log('视频帧发送成功:', faceResponse);
-      } catch (error: any) {
-        console.error('视频帧发送失败:', error);
-        if (error?.response?.status === 401) {
-          alert('视频认证失败: ' + error.message);
-        }
-      }
-    }, 3000);
+    //     console.log('视频帧发送成功:', faceResponse);
+    //   } catch (error: any) {
+    //     console.error('视频帧发送失败:', error);
+    //     if (error?.response?.status === 401) {
+    //       alert('视频认证失败: ' + error.message);
+    //     }
+    //   }
+    // }, 3000);
 
-    // 4. 设置语音定时发送
-    audioInterval = setInterval(() => {
-      if (audioRecorder && audioRecorder.state !== 'inactive') {
-        try {
-          // 安全地停止并重新开始录音器
-          if (audioRecorder.state === 'recording') {
-            audioRecorder.stop();
-          }
-        } catch (error) {
-          console.error('停止音频录制器失败:', error);
-        }
-      } else if (audioProcessor && audioData.value.length > 0) {
-        try {
-          const wavBlob = encodeToWav(audioData.value);
-          audioData.value = [];
+    // // 4. 设置语音定时发送
+    // audioInterval = setInterval(() => {
+    //   if (audioRecorder && audioRecorder.state !== 'inactive') {
+    //     try {
+    //       // 安全地停止并重新开始录音器
+    //       if (audioRecorder.state === 'recording') {
+    //         audioRecorder.stop();
+    //       }
+    //     } catch (error) {
+    //       console.error('停止音频录制器失败:', error);
+    //     }
+    //   } else if (audioProcessor && audioData.value.length > 0) {
+    //     try {
+    //       const wavBlob = encodeToWav(audioData.value);
+    //       audioData.value = [];
 
-          // 添加固定 requestId: '8'
-          msrVoice({
-            sid: '234',
-            recordId: '8',
-            requestId: '8', // 添加固定requestId
-            file: wavBlob,
-          })
-            .then(voiceResponse => {
-              console.log('语音片段发送成功:', voiceResponse);
-            })
-            .catch((error: any) => {
-              console.error('语音片段发送失败:', error);
-              if (error?.response?.status === 401) {
-                alert('语音认证失败: ' + error.message);
-              }
-            });
-        } catch (error) {
-          console.error('语音编码失败:', error);
-        }
-      }
-    }, 4000);
+    //       // 添加固定 requestId: '8'
+    //       msrVoice({
+    //         sid: '234',
+    //         recordId: '8',
+    //         requestId: '8', // 添加固定requestId
+    //         file: wavBlob,
+    //       })
+    //         .then(voiceResponse => {
+    //           console.log('语音片段发送成功:', voiceResponse);
+    //         })
+    //         .catch((error: any) => {
+    //           console.error('语音片段发送失败:', error);
+    //           if (error?.response?.status === 401) {
+    //             alert('语音认证失败: ' + error.message);
+    //           }
+    //         });
+    //     } catch (error) {
+    //       console.error('语音编码失败:', error);
+    //     }
+    //   }
+    // }, 4000);
   } catch (error) {
     console.error('面试启动失败:', error);
     alert('启动面试失败，请检查网络连接和权限设置');
@@ -980,15 +1460,29 @@ const startInterview = async () => {
 
 // 停止面试
 const stopInterview = () => {
+   stopBarChartsAnimation();
   console.log("hhh");
-  
-  isInterviewing.value = false;
+   startMetricsDecline();
+ isInterviewing.value = false;
   stopGaugesAnimation();
+  
   if (countdownInterval.value) {
     clearInterval(countdownInterval.value);
     countdownInterval.value = null;
   }
+  
+  // 更新问题和建议
+  currentQuestionIndex.value = (currentQuestionIndex.value + 1) % fixedQuestions.length;
+  currentQuestion.value = fixedQuestions[currentQuestionIndex.value];
+  adviceTips.value = fixedAdvice[currentQuestionIndex.value];
+  
+  // 更新问题来源显示
+  currentSourceIndex.value = (currentSourceIndex.value + 1) % questionSources.value.length;
 
+  // 检查是否完成所有问题
+  if (currentQuestionIndex.value === totalQuestions - 1) {
+    interviewFinished.value = true;
+  }
   // 更新问题和建议（如果有新获取的）
   if (tempQuestion.value) {
     currentQuestion.value = tempQuestion.value;
@@ -1030,14 +1524,14 @@ const stopInterview = () => {
     audioChunks.value = [];
 
     // 添加固定 requestId: '8'
-    msrVoice({
-      sid: '234',
-      recordId: '8',
-      requestId: '8',
-      file: audioBlob,
-    }).catch(error => {
-      console.error('最终语音分析请求失败:', error);
-    });
+    // msrVoice({
+    //   sid: '234',
+    //   recordId: '8',
+    //   // requestId: '8',
+    //   file: audioBlob,
+    // }).catch(error => {
+    //   console.error('最终语音分析请求失败:', error);
+    // });
   }
 
   audioData.value = [];
@@ -1046,22 +1540,51 @@ const stopInterview = () => {
   
   // 自动开始下一题，直到第三题
   // console.log("interview",isInterviewing.value);
-  currentSourceIndex.value = (currentSourceIndex.value + 1) % questionSources.value.length;
+  // currentSourceIndex.value = (currentSourceIndex.value + 1) % questionSources.value.length;
+  if (currentQuestionIndex.value === totalQuestions - 1) {
+    interviewFinished.value = true;
+    canGenerateReport.value = false; // 初始状态不可用
+  }
+
 
   
 
   
 };
 const generateReport = () => {
-  console.log('生成模拟报告');
-  // 这里可以添加实际的报告生成逻辑
-  // 例如：跳转到报告页面 this.$router.push('/report');
+  if (!canGenerateReport.value) return;
+  isInterviewing.value=true
+  generatingReport.value = true;
+  progress.value = 0;
+  countdown2.value = 5;
   
-  // 重置状态以便再次开始
-  stopCount.value = 0;
-  isInterviewing.value = false;
-  currentQuestion.value = '';
+  // 模拟报告生成进度
+  const progressInterval = setInterval(() => {
+    progress.value += 5;
+    if (progress.value >= 100) {
+      clearInterval(progressInterval);
+    }
+  }, 200);
+  
+  // 倒计时跳转
+  const countdownInterval = setInterval(() => {
+    countdown2.value--;
+    if (countdown2.value <= 0) {
+      clearInterval(countdownInterval);
+      
+      // 重置状态
+      generatingReport.value = false;
+      interviewFinished.value = false;
+      currentQuestionIndex.value = 0;
+      stopCount.value = 0;
+      canGenerateReport.value = false;
+      
+      // 实际项目中这里应该是路由跳转
+      // router.push('/report');
+    }
+  }, 1000);
 };
+
 // 编码音频数据为WAV格式
 const encodeToWav = (audioChunks: Float32Array[]): Blob => {
   const sampleRate = 44100;
@@ -1117,7 +1640,7 @@ const writeString = (view: DataView, offset: number, str: string) => {
 };
 
 const stopButtonText = computed(() => {
-  return stopCount.value < 2 ? '停止回答' : '生成模拟报告';
+  return interviewFinished.value ? '生成模拟报告' : '停止回答';
 });
 
 // 获取面试问题
@@ -1150,20 +1673,20 @@ const getInterviewQuestion = async () => {
     console.log('面试问题获取成功:', result);
 
     // 5. 更新当前问题（假设接口返回数据结构）
-    if (result && result.data) {
-      // 问题
-      if (result.data.question) {
-        tempQuestion.value = result.data.question;
-      }
+    // if (result && result.data) {
+    //   // 问题
+    //   if (result.data.question) {
+    //     tempQuestion.value = result.data.question;
+    //   }
 
-      // 建议 - 按照顺序组合成数组
-      const suggestions = [];
-      if (result.data.suggestOne) suggestions.push(result.data.suggestOne);
-      if (result.data.suggestTwo) suggestions.push(result.data.suggestTwo);
-      if (result.data.suggestThree) suggestions.push(result.data.suggestThree);
+    //   // 建议 - 按照顺序组合成数组
+    //   const suggestions = [];
+    //   if (result.data.suggestOne) suggestions.push(result.data.suggestOne);
+    //   if (result.data.suggestTwo) suggestions.push(result.data.suggestTwo);
+    //   if (result.data.suggestThree) suggestions.push(result.data.suggestThree);
 
-      tempAdviceTips.value = suggestions;
-    }
+    //   tempAdviceTips.value = suggestions;
+    // }
   } catch (error) {
     console.error('获取面试问题失败:', error);
   }
@@ -1171,6 +1694,9 @@ const getInterviewQuestion = async () => {
 
 // 生命周期钩子
 onMounted(async () => {
+ nextTick(() => {
+    initBarCharts();
+  });
   initGauges();
   await getInterviewQuestion();
   if (tempQuestion.value) {
@@ -1498,7 +2024,7 @@ const startGaugesAnimation = () => {
         series: [{ data: newData }],
       });
     }
-  }, 2000);
+  }, 1000);
 
   gaugeTimer2.value = setInterval(() => {
     if (chart2.value) {
@@ -1507,7 +2033,7 @@ const startGaugesAnimation = () => {
         series: [{ data: newData }],
       });
     }
-  }, 3000);
+  }, 2000);
 
   gaugeTimer3.value = setInterval(() => {
     if (chart3.value) {
@@ -1516,7 +2042,7 @@ const startGaugesAnimation = () => {
         series: [{ data: newData }],
       });
     }
-  }, 3500);
+  }, 3000);
 };
 
 // 停止仪表盘动画并重置为0
@@ -1556,7 +2082,9 @@ const initGauges = () => {
   chart2.value.setOption(createGaugeOption(createInitialGaugeData()));
   chart3.value.setOption(createGaugeOption(createInitialGaugeData()));
 };
+import { useRoute } from 'vue-router'
 
+const route = useRoute()
 // 创建仪表盘配置函数
 // const createGaugeOption = (gaugeData: any[]) => {
 //   return {
@@ -1710,7 +2238,169 @@ onBeforeUnmount(() => {
   }
 });
 </script>
-<style scoped>
+<style scoped lang="scss">
+.bar-charts-container {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+
+.bar-chart-box {
+  flex: 1;
+  height: 107px;
+  background-color: #f0f5ff;
+  border: 1px solid #c2ecff;
+  border-radius: 8px;
+  padding: 5px;
+  box-sizing: border-box;
+}
+
+.bar-chart {
+  width: 100%;
+  height: 100%;
+}
+.report-loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  backdrop-filter: blur(5px);
+}
+
+.loading-content {
+  background: white;
+  border-radius: 16px;
+  padding: 40px;
+  width: 90%;
+  max-width: 500px;
+  text-align: center;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+}
+
+.loading-content h3 {
+  font-size: 24px;
+  color: #1a1a1c;
+  margin: 20px 0 10px;
+}
+
+.loading-content p {
+  color: #666;
+  margin-bottom: 20px;
+  font-size: 16px;
+}
+
+.countdown {
+  color: #00aeff;
+  font-weight: bold;
+  margin-top: 15px;
+}
+
+.progress {
+  height: 10px;
+  background: #f0f5ff;
+  border-radius: 5px;
+  overflow: hidden;
+  margin: 25px 0;
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #00aeff, #3a82ff);
+  border-radius: 5px;
+  transition: width 0.3s ease;
+}
+
+/* 加载动画 */
+.spinner {
+  width: 70px;
+  text-align: center;
+  margin: 0 auto;
+}
+
+.spinner > div {
+  width: 18px;
+  height: 18px;
+  background-color: #00aeff;
+  border-radius: 100%;
+  display: inline-block;
+  animation: bounce 1.4s infinite ease-in-out both;
+}
+
+.spinner .bounce1 {
+  animation-delay: -0.32s;
+}
+
+.spinner .bounce2 {
+  animation-delay: -0.16s;
+}
+
+@keyframes bounce {
+  0%, 80%, 100% {
+    transform: scale(0);
+  } 40% {
+    transform: scale(1.0);
+  }
+}
+ .video-container {
+     position: relative;
+     width: 94%;  /* 宽度设为100%表示占满父容器 */
+     padding-top: 56.25%; /* 16:9 宽高比 (9/16 = 0.5625 即 56.25%) */
+   }
+   .video-container video {
+     position: absolute;
+     top: 10px;
+     left: 22px;
+     width: 100%;
+     height: 90%;
+     object-fit: cover; /* 保持比例并填充容器，可能会裁剪边缘 */
+   }
+.page-header {
+  position: relative;
+  width: 99vw;
+  height: 70px;
+  // background-color: red;
+  box-sizing: border-box;
+  // margin-left:40px  ;
+  padding-left: 40px;
+  padding-right: 71px !important;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 20px;
+  color: #1a1a1c;
+  .header-left {
+    width: 160px;
+    height: 54px;
+  .logo{
+    margin-left: 30px;
+  }
+  }
+  .header-nav {
+    width: 495px;
+    // background-color: antiquewhite;
+    margin-left: 100px;
+    height: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #1a1a1c;
+    font-weight: bold;
+    // .nax
+    button {
+      width: 164px;
+      border-radius: 66px;
+      background-color: #00aeff;
+      color: white;
+      margin-left: -19px;
+    }
+  }
+}
 /* 仪表盘容器 */
 .notice[data-status='good'] {
   color: #52c41a;
@@ -1974,7 +2664,7 @@ onBeforeUnmount(() => {
 }
 
 .popup-header {
-  background: linear-gradient(135deg, #1a2a6c, #b21f1f);
+  background: #1193cf;
   color: white;
   padding: 25px;
   text-align: center;
@@ -2043,7 +2733,7 @@ onBeforeUnmount(() => {
 }
 
 .option {
-  padding: 20px 15px;
+  padding: 20px 15px 12px 15px;
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -2074,8 +2764,8 @@ onBeforeUnmount(() => {
 }
 
 .allow-always {
-  background: rgba(46, 204, 113, 0.1);
-  border-color: rgba(46, 204, 113, 0.3);
+  /* background: rgba(46, 204, 113, 0.1); */
+  border-color: #E3E2E8;
 }
 
 .allow-always i {
@@ -2083,8 +2773,8 @@ onBeforeUnmount(() => {
 }
 
 .allow-once {
-  background: rgba(52, 152, 219, 0.1);
-  border-color: rgba(52, 152, 219, 0.3);
+  /* background: rgba(52, 152, 219, 0.1); */
+  border-color: #E3E2E8;
 }
 
 .allow-once i {
@@ -2092,9 +2782,15 @@ onBeforeUnmount(() => {
 }
 
 .deny {
-  background: rgba(231, 76, 60, 0.1);
-  border-color: rgba(231, 76, 60, 0.3);
+  /* background: rgba(231, 76, 60, 0.1); */
+  border-color:#E3E2E8;
+  color: #B0AFB7 !important;
+  
 }
+.deny p{
+  
+      color: #B0AFB7 !important;
+  }
 
 .deny i {
   color: #e74c3c;
@@ -2165,7 +2861,7 @@ onBeforeUnmount(() => {
   .header-left {
     width: 160px;
     height: 54px;
-    background-color: #d9d9d9;
+    // background-color: #d9d9d9;
   }
 }
 .interview-container {
@@ -2195,7 +2891,7 @@ onBeforeUnmount(() => {
     border: 1.5px solid #68b0d1;
     border-radius: 8px;
     box-sizing: border-box;
-    padding: 16px 20px;
+   padding: 15px 5px;
     display: flex;
     flex-direction: column;
     align-items: space-around;
@@ -2234,7 +2930,7 @@ onBeforeUnmount(() => {
 .video {
   video {
     width: 680px;
-    margin-left: 10px;
+    margin-left: px;
     height: 344px;
     background-color: #d1d1e2;
     border-radius: 8px;
@@ -2243,8 +2939,8 @@ onBeforeUnmount(() => {
   }
 }
 .question-section {
-  // margin-top: 15px;
-  margin: 15px 0;
+  margin-top:-12px;
+  // margin: 15px 0;
   display: flex;
   flex-direction: column;
   img {
@@ -2256,7 +2952,7 @@ onBeforeUnmount(() => {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    width: 680px;
+    width: 690px;
     height: 40px;
     border: 1.5px solid #68b0d1;
     border-radius: 8px;
@@ -2275,7 +2971,8 @@ onBeforeUnmount(() => {
 .advice-section {
   display: flex;
   flex-direction: column;
-  margin-bottom: 10px;
+  // margin-bottom: 10px;
+  margin-top: 8px;
 
   img {
     width: 122px;
@@ -2284,15 +2981,16 @@ onBeforeUnmount(() => {
   }
   .advice-list {
     // width: 680px;
-    width: 370px;
+    width: 690px;
     margin-left: 15px;
-    height: 122px;
+    height: 117px;
     box-sizing: border-box;
-    padding: 15px 20px;
+    padding: 15px;
+    
     display: flex;
     flex-direction: column;
     gap: 5px;
-    border-radius: 8px;
+    border-radius: 7px;
 
     border: 1.5px solid #68b0d1;
     li {
@@ -2311,9 +3009,10 @@ onBeforeUnmount(() => {
   }
 }
 .button-group {
+  margin-top: 7px;
   display: flex;
   justify-content: flex-end;
-  margin-right: 5px;
+  margin-right: 15px;
   .el-button {
     background-clip: #00aeff;
     border-radius: 18px;
@@ -2358,5 +3057,215 @@ onBeforeUnmount(() => {
 .chart-container {
   width: 200px;
   height: 100px;
+}
+.page-header {
+  width: 99vw;
+  height: 70px;
+  box-sizing: border-box;
+  padding-left: 40px;
+  padding-right: 71px !important;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 20px;
+  color: #1a1a1c;
+  .header-left {
+    width: 160px;
+    height: 54px;
+    // background-color: #d9d9d9;
+  }
+  .header-nav {
+    width: 495px;
+    height: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color:black;
+    font-weight: bold;
+    button {
+      width: 164px;
+      border-radius: 66px;
+      background-color: #00aeff;
+      color: white;
+      margin-left: -19px;
+    }
+  }
+  .item1,.item2,.item3{
+    margin-top: 40px;
+    width: 100%;
+    height: 100%;
+    position: relative;
+
+  }
+}
+ .page-header {
+  display: flex;
+  align-items: center;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 100, 0.1);
+  padding: 0 25px;
+  height: 80px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.page-header:hover {
+  box-shadow: 0 10px 40px rgba(0, 80, 200, 0.15);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  margin-right: 40px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  font-weight: 700;
+  font-size: 24px;
+  color: #2563eb;
+  text-decoration: none;
+}
+
+.logo-icon {
+  margin-right: 12px;
+  font-size: 28px;
+  color: #3b82f6;
+}
+
+.logo-text {
+  position: relative;
+  top: -2px;
+}
+
+.logo-text span {
+  color: #0ea5e9;
+}
+
+.header-nav {
+  display: flex;
+  flex: 1;
+  height: 100%;
+  align-items: center;
+}
+
+.nav-items {
+  display: flex;
+  height: 100%;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  padding: 0 18px;
+  height: 100%;
+  font-weight: 600;
+  font-size: 16px;
+  color: #4b5563;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.nav-item:hover {
+  color: #2563eb;
+}
+
+.nav-item:hover::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 18px;
+  right: 18px;
+  height: 3px;
+  background: #3b82f6;
+  border-radius: 10px 10px 0 0;
+}
+
+.nav-item.active {
+  color: #00aeff;
+}
+
+.nav-item.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 18px;
+  right: 18px;
+  height: 3px;
+  background: #00aeff;
+  border-radius: 10px 10px 0 0;
+}
+
+.nav-item i {
+  margin-right: 8px;
+  font-size: 18px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  width: 150px !important;
+}
+
+.start-button2 {
+  background-color: #00aeff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  width: 220px !important;
+  border: none;
+  border-radius: 66px !important;
+  padding: 12px 20px 12px 28px;
+  font-weight: 550;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(67, 94, 136, 0.4);
+  display: flex;
+  align-items: center;
+}
+
+.start-button2:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(99, 110, 129, 0.6);
+}
+
+.start-button2:active {
+  transform: translateY(1px);
+}
+
+.start-button2 i {
+  margin-left: 8px;
+  font-size: 14px;
+}
+.header-nav{
+  margin-left: 68px;
+}
+.bar-charts-container {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  height: 107px; /* 设置固定高度 */
+}
+
+.bar-chart-box {
+  flex: 1;
+  height: 100%;
+  background-color: #f0f5ff;
+  border: 1px solid #c2ecff;
+  border-radius: 8px;
+  padding: 5px;
+  box-sizing: border-box;
+}
+
+.bar-chart {
+  width: 100%;
+  height: 100%;
+  min-height: 90px; /* 确保有最小高度 */
 }
 </style>
