@@ -4,8 +4,7 @@
     <div class="page-header" :class="{ 'fixed-header': isHeaderFixed }">
       <div class="header-left">
         <a href="#" class="logo">
-          <i class="fas fa-rocket logo-icon"></i>
-          <div class="logo-text">Career<span>Path</span></div>
+         <img src="../assets/images/logo.png" alt="">
         </a>
       </div>
 

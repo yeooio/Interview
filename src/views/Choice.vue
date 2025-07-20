@@ -2,9 +2,8 @@
   <div class="choice">
     <div class="page-header" >
       <div class="header-left">
-        <a href="#" class="logo">
-          <i class="fas fa-rocket logo-icon"></i>
-          <div class="logo-text">Career<span>Path</span></div>
+         <a href="#" class="logo">
+         <img src="../assets/images/logo.png" alt="">
         </a>
       </div>
 
@@ -84,11 +83,7 @@
             选择岗位
           </el-button>
         </div>
-        <transition name="fade">
-          <div v-if="selectedPosition" class="selected-position">
-            已选择: {{ selectedPosition }}
-          </div>
-        </transition>
+        
       </div>
       <div class="item2">
         <img src="../assets/images/Component 17.png" alt="" class="img">
@@ -98,11 +93,7 @@
             选择岗位
           </el-button>
         </div>
-        <transition name="fade">
-          <div v-if="selectedPosition" class="selected-position">
-            已选择: {{ selectedPosition }}
-          </div>
-        </transition>
+       
       </div>
       <div class="item3">
         <img src="../assets/images/Component 18.png" alt="" class="img">
@@ -112,11 +103,7 @@
             选择岗位
           </el-button>
         </div>
-        <transition name="fade">
-          <div v-if="selectedPosition" class="selected-position">
-            已选择: {{ selectedPosition }}
-          </div>
-        </transition>
+       
       </div>
     </div>
     

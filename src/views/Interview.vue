@@ -464,17 +464,16 @@ const getRandomChange = (min: number, max: number) => {
 // 柱形图
 import { nextTick } from 'vue';
 
-// 柱形图相关变量
 const barChart1 = ref<HTMLElement | null>(null);
 const barChart2 = ref<HTMLElement | null>(null);
 let barChartInstance1: echarts.ECharts | null = null;
 let barChartInstance2: echarts.ECharts | null = null;
 
-// 柱形图数据
+// 柱状图数据
 const barData1 = ref([85, 92, 78]); // 专业知识水平、技能匹配度、表达语言能力
 const barData2 = ref([90, 82, 88]); // 逻辑思维能力、创新能力、应变抗压能力
 
-// 初始化柱形图
+// 初始化柱状图
 const initBarCharts = () => {
   if (!barChart1.value || !barChart2.value) return;
   
@@ -486,7 +485,7 @@ const initBarCharts = () => {
   barChartInstance1 = echarts.init(barChart1.value);
   barChartInstance2 = echarts.init(barChart2.value);
   
-  // 第一个柱形图配置
+  // 第一个柱状图配置
   const option1 = {
     tooltip: {
       trigger: 'axis',
@@ -550,7 +549,7 @@ const initBarCharts = () => {
     }]
   };
   
-  // 第二个柱形图配置
+  // 第二个柱状图配置
   const option2 = {
     tooltip: {
       trigger: 'axis',
@@ -622,66 +621,82 @@ const initBarCharts = () => {
   barChartInstance2.resize();
 };
 
-// 更新柱形图数据（随机变化）
+// 更新柱状图数据（随机变化）
 const updateBarCharts = () => {
   if (!barChartInstance1 || !barChartInstance2) return;
   
-  // 随机更新数据
+  // 随机更新数据（使用整数，无小数）
   barData1.value = barData1.value.map(val => 
-    Math.max(60, Math.min(100, val + Math.random() * 10 - 5))
+    Math.max(60, Math.min(100, val + Math.floor(Math.random() * 10) - 5))
   );
   
   barData2.value = barData2.value.map(val => 
-    Math.max(60, Math.min(100, val + Math.random() * 10 - 5))
+    Math.max(60, Math.min(100, val + Math.floor(Math.random() * 10) - 5))
   );
   
   // 应用新数据
   barChartInstance1.setOption({
     series: [{
-      data: barData1.value
+      data: [
+        {value: barData1.value[0], itemStyle: {color: '#3A82FF'}},
+        {value: barData1.value[1], itemStyle: {color: '#FFDD36'}},
+        {value: barData1.value[2], itemStyle: {color: '#4EFF8F'}}
+      ]
     }]
   });
   
   barChartInstance2.setOption({
     series: [{
-      data: barData2.value
+      data: [
+        {value: barData2.value[0], itemStyle: {color: '#FF6B6B'}},
+        {value: barData2.value[1], itemStyle: {color: '#FFA36C'}},
+        {value: barData2.value[2], itemStyle: {color: '#6B5B95'}}
+      ]
     }]
   });
 };
 
-// 递减柱形图数据
+// 递减柱状图数据（无小数）
 const declineBarCharts = () => {
   if (!barChartInstance1 || !barChartInstance2) return;
   
   barData1.value = barData1.value.map(val => 
-    Math.max(0, val - 10)
+    Math.max(0, Math.floor(val * 0.8)) // 使用整数
   );
   
   barData2.value = barData2.value.map(val => 
-    Math.max(0, val - 10)
+    Math.max(0, Math.floor(val * 0.8)) // 使用整数
   );
   
   barChartInstance1.setOption({
     series: [{
-      data: barData1.value
+      data: [
+        {value: barData1.value[0], itemStyle: {color: '#3A82FF'}},
+        {value: barData1.value[1], itemStyle: {color: '#FFDD36'}},
+        {value: barData1.value[2], itemStyle: {color: '#4EFF8F'}}
+      ]
     }]
   });
   
   barChartInstance2.setOption({
     series: [{
-      data: barData2.value
+      data: [
+        {value: barData2.value[0], itemStyle: {color: '#FF6B6B'}},
+        {value: barData2.value[1], itemStyle: {color: '#FFA36C'}},
+        {value: barData2.value[2], itemStyle: {color: '#6B5B95'}}
+      ]
     }]
   });
 };
 
-// 启动柱形图动画
+// 启动柱状图动画
 let barChartTimer: number | null = null;
 const startBarChartsAnimation = () => {
   if (barChartTimer) clearInterval(barChartTimer);
   barChartTimer = setInterval(updateBarCharts, 2000) as unknown as number;
 };
 
-// 停止柱形图动画并递减
+// 停止柱状图动画并递减
 const stopBarChartsAnimation = () => {
   if (barChartTimer) {
     clearInterval(barChartTimer);
@@ -698,7 +713,6 @@ const stopBarChartsAnimation = () => {
     }
   }, 200) as unknown as number;
 };
-
 
 
 
@@ -953,8 +967,8 @@ const handleVoiceMessage = (data: any) => {
   }
 
   if (data.data?.word?.frame) {
-    starApplication.value = `${parseInt(data.data.word.frame.star) || 0}%`; // STAR 结构应用：数字转字符串并拼接 %
-    problemComprehension.value = `${parseInt(data.data.word.frame.comprehend) || 0}%`; // 问题理解度：同上
+ starApplication.value = parseInt(data.data.word.frame.star) || 0; // STAR 结构应用：数字转字符串并拼接 %
+    problemComprehension.value = parseInt(data.data.word.frame.comprehend) || 0; // 问题理解度：同上
   }
 };
 
@@ -967,7 +981,7 @@ const handleFaceMessage = (event: MessageEvent) => {
     if (data.face.frame) {
       console.log('1111');
 
-      eyeContact.value = `${parseInt(data.face.frame.eye) || 0}%`;
+      eyeContact.value = parseInt(data.face.frame.eye) || 0;
       console.log('eye', eyeContact.value);
 
       // eyeContact.value = parseInt(data.data.face.frame.eye) || '0%';
@@ -991,30 +1005,29 @@ const getFillerStatus = (filler: number) => {
   return '过多';
 };
 
-const getEyeContactStatus = (eye: string) => {
-  const value = parseFloat(eye);
-  if (value >= 80) return '优秀';
-  if (value >= 60) return '可提升';
+const getEyeContactStatus = (eye: number) => {
+ if (eye >= 80) return '优秀';
+  if (eye >= 60) return '可提升';
   return '需加强';
 };
 
-const getNatureStatus = (nature: string) => {
-  if (nature === '高') return '优秀';
-  if (nature === '中等') return '可提升';
+const getNatureStatus = (nature: number) => {
+  if (nature >= 80) return '优秀';
+  if (nature >= 60) return '可提升';
   return '需加强';
 };
 
-const getStarStatus = (star: string) => {
-  const value = parseFloat(star);
-  if (value >= 80) return '优秀';
-  if (value >= 60) return '需加强';
+// STAR结构应用状态
+const getStarStatus = (star: number) => {
+  if (star >= 80) return '优秀';
+  if (star >= 60) return '需加强';
   return '需提升';
 };
 
-const getComprehendStatus = (comprehend: string) => {
-  const value = parseFloat(comprehend);
-  if (value >= 90) return '优秀';
-  if (value >= 75) return '良好';
+// 问题理解度状态
+const getComprehendStatus = (comprehend: number) => {
+  if (comprehend >= 90) return '优秀';
+  if (comprehend >= 75) return '良好';
   return '需提升';
 };
 // 初始化图表
@@ -2248,8 +2261,8 @@ onBeforeUnmount(() => {
 .bar-chart-box {
   flex: 1;
   height: 107px;
-  background-color: #f0f5ff;
-  border: 1px solid #c2ecff;
+  // background-color: #f0f5ff;
+  border: 1px solid #e9e9e9;
   border-radius: 8px;
   padding: 5px;
   box-sizing: border-box;
@@ -3043,7 +3056,7 @@ onBeforeUnmount(() => {
 }
 .guage-card {
   width: 176px;
-  height: 456px;
+  height: 426px;
   background-color: #f0f5ff;
   border: 1px solid #c2ecff;
   border-radius: 8px;
@@ -3249,15 +3262,15 @@ onBeforeUnmount(() => {
 .bar-charts-container {
   display: flex;
   gap: 10px;
-  width: 100%;
-  height: 107px; /* 设置固定高度 */
+  width: 550px;
+  height: 137px; /* 设置固定高度 */
 }
 
 .bar-chart-box {
   flex: 1;
   height: 100%;
-  background-color: #f0f5ff;
-  border: 1px solid #c2ecff;
+  // background-color: #f0f5ff;
+  // border: 1px solid #c2ecff;
   border-radius: 8px;
   padding: 5px;
   box-sizing: border-box;
