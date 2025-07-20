@@ -674,5 +674,7 @@ const startInterview = async () => {
   margin-left: 68px;
 }
 
-
+.page-header .header-left{
+  background-color: white !important;
+}
 </style>

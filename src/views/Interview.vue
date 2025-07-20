@@ -3282,4 +3282,7 @@ onBeforeUnmount(() => {
   height: 100%;
   min-height: 90px; /* 确保有最小高度 */
 }
+.page-header .header-left{
+  background-color: white !important;
+}
 </style>

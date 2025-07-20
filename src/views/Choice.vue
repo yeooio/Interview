@@ -2022,4 +2022,7 @@ textarea {
 .step-content {
   transition: opacity 0.3s ease, transform 0.3s ease;
 }
+.page-header .header-left{
+  background-color: white !important;
+}
 </style>

@@ -1373,4 +1373,9 @@ li {
     // background: #F9FCFF;
   }
 }
+
+
+.page-header .header-left{
+  background-color: white !important;
+}
 </style>
