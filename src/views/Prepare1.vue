@@ -80,7 +80,9 @@
     
  
     <div class="simulation-info">
-      <div class="video-placeholder"></div>
+      <div class="video-placeholder">
+        <img src="../assets//images/Component logo.png" alt="">
+      </div>
       <h1 class="section-title">模拟面试</h1>
       <!-- <p class="desc"> -->
         <div class='desc'>
@@ -369,7 +371,7 @@ const startInterview = async () => {
 .video-placeholder {
   width:510px;
   height: 244px;
-  background-color: #fff;
+ 
   border-radius: 8px;
   margin-bottom: 5px;
 }
