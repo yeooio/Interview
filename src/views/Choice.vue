@@ -74,39 +74,44 @@
       </div>
     </div>
     
-    <div class="choice-position">
-      <div class="item1">
-        <img src="../assets/images/IT3.png" alt="" class="img">
-        <div class="click">
-          <span>IT领域</span>
-          <el-button type="primary" @click="openPositionDialog">
-            选择岗位
-          </el-button>
-        </div>
-        
-      </div>
-      <div class="item2">
-        <img src="../assets/images/Component 17.png" alt="" class="img">
-        <div class="click">
-          <span>法律领域</span>
-          <el-button type="primary" @click="openPositionDialog">
-            选择岗位
-          </el-button>
-        </div>
-       
-      </div>
-      <div class="item3">
-        <img src="../assets/images/Component 18.png" alt="" class="img">
-        <div class="click">
-          <span>金融领域</span>
-          <el-button type="primary" @click="openPositionDialog">
-            选择岗位
-          </el-button>
-        </div>
-       
+   <div class="choice-position">
+    <div class="item1">
+      <img src="../assets/images/IT3.png" alt="" class="img">
+      <div class="click">
+        <span>人工智能领域</span>
+        <el-button type="primary" @click="openPositionDialog('ai')">
+          选择岗位
+        </el-button>
       </div>
     </div>
-    
+    <div class="item2">
+      <img src="../assets/images/Component 18.png" alt="" class="img">
+      <div class="click">
+        <span>大数据领域</span>
+        <el-button type="primary" @click="openPositionDialog('bigData')">
+          选择岗位
+        </el-button>
+      </div>
+    </div>
+    <div class="item3">
+      <img src="../assets/images/abc.png" alt="" class="img">
+      <div class="click">
+        <span>物联网领域</span>
+        <el-button type="primary" @click="openPositionDialog('iot')">
+          选择岗位
+        </el-button>
+      </div>
+    </div>
+    <div class="item3">
+      <img src="../assets/images/safe.png" alt="" class="img">
+      <div class="click">
+        <span>智能系统领域</span>
+        <el-button type="primary" @click="openPositionDialog('intelligentSystems')">
+          选择岗位
+        </el-button>
+      </div>
+    </div>
+  </div>
     <!-- 自定义弹窗替换el-dialog -->
     <div class="custom-dialog" v-show="dialogVisible">
       <div class="dialog-container">
@@ -125,6 +130,7 @@
               <div class="step-label">设备调试</div>
             </div>
           </div>
+           <button class="close-btn" @click="closeDialog">×</button>
         </div>
         
         <!-- 步骤1: 岗位选择 -->
@@ -136,7 +142,7 @@
           
           <div class="positions-grid">
             <div 
-              v-for="(position, index) in positions" 
+              v-for="(position, index) in currentPositions" 
               :key="index"
               class="position-btn"
               :class="{ selected: selectedPosition === position }"
@@ -390,11 +396,54 @@ const router = useRouter()
 
 const dialogVisible = ref(false)
 // const selectedPosition = ref('')
-const positions = ref([
-  '软件工程师', '数据分析师', '系统构建师',
-  '数据科学家', '网络工程师', '后端开发师',
-  'UI设计师', 'UX设计师', '前端开发师'
-])
+const positionGroups = {
+  ai: [
+    '机器学习工程师',
+    '深度学习研究员',
+    '自然语言处理工程师',
+    '计算机视觉工程师',
+    '人工智能算法工程师',
+    '数据科学家',
+    'AI产品经理',
+    'AI平台运维工程师',
+    "MLOps工程师"
+  ],
+  bigData: [
+    '大数据开发工程师',
+    '数据仓库工程师',
+    '数据平台工程师',
+    '后端应用工程师',
+    '数据挖掘工程师',
+    'BI开发工程师',
+    '数据工程师',
+    '数据治理专家',
+    '区块链工程师'
+  ],
+  iot: [
+    '嵌入式软件工程师',
+    '物联网解决方案架构师',
+    '物联网硬件工程师',
+    '物联网平台开发工程师',
+    '边缘计算工程师',
+    '物联网数据工程师',
+    '物联网测试工程师',
+    '物联网安全工程师',
+    '物联网产品经理'
+  ],
+  intelligentSystems: [
+    '智能系统架构师',
+    '机器人算法工程师',
+    '自动驾驶系统工程师',
+    '智能控制工程师',
+    '人机交互工程师',
+    '智能决策系统工程师',
+    '智能诊断与运维工程师',
+    '智能仿真工程师',
+    '智能系统集成工程师'
+  ]
+}
+const currentPositions = ref<string[]>([])
+const currentField = ref('')
 const currentStep = ref(1)
 const dragOver = ref(false)
 // const files = ref([])
@@ -407,14 +456,18 @@ const aiScore = ref(92)
 const aiResumeReady = ref(false)
 const resumeFileName = ref('')
 
-const openPositionDialog = () => {
+const openPositionDialog = (field: string) => {
+  currentField.value = field
+  currentPositions.value = positionGroups[field as keyof typeof positionGroups]
   dialogVisible.value = true
   currentStep.value = 1
+  selectedPosition.value = ''
   files.value = []
   uploadStatus.value = null
   aiPreviewVisible.value = false
   aiResumeReady.value = false
 }
+
 
 const selectPosition = (position:string) => {
   selectedPosition.value = position
@@ -589,10 +642,35 @@ const navigateTo = (page:string) => {
 const routerPlease = () => {
   router.push('/Prepare1')
 }
+const closeDialog = () => {
+  dialogVisible.value = false
+}
 </script>
 
 <style lang="scss" scoped>
 /* 原有样式保持不变 */
+.close-btn {
+  position: absolute;
+  top:-50px;
+  right: -60px;
+  // width: 30px;
+  // height: 80px;
+  font-size: 52px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #266c7b;
+  transition: all 0.3s;
+}
+
+.close-btn:hover {
+  color: #333;
+  transform: scale(1.2);
+}
+
+.dialog-header {
+  position: relative; /* 确保关闭按钮定位正确 */
+}
 .choice{
   width: 99vw;
   // height: 3000px;

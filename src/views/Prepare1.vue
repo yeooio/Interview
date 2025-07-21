@@ -121,7 +121,7 @@
           <el-form-item label="面试题数：">
             <el-select v-model="form.questionCount" placeholder="请选择">
               <el-option label="3" value="3"></el-option>
-              <el-option label="8" value="5"></el-option>
+              <el-option label="5" value="5"></el-option>
               <el-option label="10" value="10"></el-option>
             </el-select>
           </el-form-item>
